@@ -50,8 +50,8 @@ source("./R scripts/0 LoadPackages.R")
     # indiViduals data
     mycolsPES <- c( "V0101", # year
                     "UF",    # State
-                    "V0102", # Número de controle
-                    "V0103", # Número de serie
+                    "V0102", # NÃºmero de controle
+                    "V0103", # NÃºmero de serie
                     "V0403", # Family number
                     "V4729", # Person Weight
                     "V4732", # Family Weight
@@ -80,8 +80,8 @@ source("./R scripts/0 LoadPackages.R")
     # household data
     mycolsDOM <- c("V0101", # year
                    "UF",    # State
-                   "V0102", # Número de controle
-                   "V0103", # Número de serie
+                   "V0102", # NÃºmero de controle
+                   "V0103", # NÃºmero de serie
                    "V0403", # Family number
                    "V4729", # Person Weight
                    "V4732", # Family Weight
@@ -90,10 +90,10 @@ source("./R scripts/0 LoadPackages.R")
                    "V4602", # Strata
                    "V4617", # STRAT
                    "V4609", # Population Projection
-                   "UPA",   # Delimitação do município
-                   "V4618", # PSU - Unidade primária de amostragem
+                   "UPA",   # DelimitaÃ§Ã£o do municÃ­pio
+                   "V4618", # PSU - Unidade primÃ¡ria de amostragem
                    "V4619", # Fator de subamostragem
-                   "V4610", # InVerso da fração
+                   "V4610", # InVerso da fraÃ§Ã£o
                    "V4611", # Household weight
                    "V0233", # Household registered in 'saude da familia' program
                    "V0234") # time since registration
@@ -554,7 +554,7 @@ gc(reset = T)
     
     
     
-    # Gráfico 3 - % per region
+    # GrÃ¡fico 3 - % per region
       # South: 50.35 , North: 51.0 , Midwest: 49.1
       
       svyby(~factor(v0233==1),  ~region, design= sample.pnad08dom,  vartype="ci",  level = 0.95,svyciprop)
@@ -567,7 +567,7 @@ gc(reset = T)
 # paper of Knuth et al (2011), available at http://www.scielo.br/scielo.php?script=sci_arttext&pid=S1413-81232011001000007
 
 # todos valores absolutos e propocoes ficam muito proximos, mas nunca batem perfeitamente
-# Acredito que seja por conta da reponderacao que o IBGE fez apÃ³s o Censo 2010
+# Acredito que seja por conta da reponderacao que o IBGE fez apÃƒÂ³s o Censo 2010
 
 
 
