@@ -5,7 +5,7 @@
 
 
 ##################### Set working directory -------------------------------------------------------
-setwd("R:/github/active_travel_brazil")
+setwd("R:/Dropbox/github/active_travel_brazil")
 
 
 
@@ -66,8 +66,8 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                 V0029,   # person sample weight without calibratio
                 V00291,  # person sample weight with calibration
                 V00292,  # Population projection
-                V00283,  # Domínio de pós-estrato 1
-                V00293,  # Domínio de pós-estrato 2
+                V00283,  # DomÃ­nio de pÃ³s-estrato 1
+                V00293,  # DomÃ­nio de pÃ³s-estrato 2
                 A01817,  # Motorcycle ownership
                 A020,    # Car ownership (number of cars)
                 v2032,   # Vehicle in the household, compatible with PNAD
@@ -106,8 +106,8 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                             nest = TRUE
                             )
   
-  ## Agora é preciso pós-estratificar:
-  ## A definição dos pós-estratos e os totais populacionais usados são dados por:
+  ## Agora Ã© preciso pÃ³s-estratificar:
+  ## A definiÃ§Ã£o dos pÃ³s-estratos e os totais populacionais usados sÃ£o dados por:
   
   ## post-estratification of sample design
   post_pop <- unique( subset(pns2013Det, select= c(V00293,V00292) ))
