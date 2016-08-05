@@ -4,7 +4,7 @@
 
 
 # Set working directory ------------
-  setwd("R:/github/active_travel_brazil")
+  setwd("R:/Dropbox/github/active_travel_brazil")
 
 
 
