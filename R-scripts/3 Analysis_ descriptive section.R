@@ -1,10 +1,3 @@
-tabelas com varias var
-http://stackoverflow.com/questions/23396528/multiple-factors-in-svyby-vs-svytotal
-
-Graficos
-http://www.r-bloggers.com/visualizing-survey-data-comparison-between-observations/
-  
-  
 # Analyze Active Travel in Brazil using data from PNS 2013 and PNAD2008 (suplemento de Saude)
 # Script written by Rafael Pereira - urbandemographics.blogspot.com
 # Aug 2016, Oxford UK.
@@ -19,7 +12,7 @@ setwd("R:/Dropbox/github/active_travel_brazil")
 
 ##################### Load packages -------------------------------------------------------
 
-source("./R scripts/0 LoadPackages.R")
+source("./R-scripts/0 LoadPackages.R")
 
     
 
