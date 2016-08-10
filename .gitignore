@@ -11,3 +11,8 @@ data/PNS2013/Thumbs.db
 *.Rds
 data/PNAD2008/dicPNAD2008.RData
 *.rtf
+plots/fig2.png
+*.csv
+data/pns13.18y.design.rda
+*.rda
+plots/fig1.png
