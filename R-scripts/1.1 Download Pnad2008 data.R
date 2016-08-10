@@ -50,8 +50,8 @@ source("./R-scripts/0 LoadPackages.R")
     # indiViduals data
     mycolsPES <- c( "V0101", # year
                     "UF",    # State
-                    "V0102", # Número de controle
-                    "V0103", # Número de serie
+                    "V0102", # Numero de controle
+                    "V0103", # Numero de serie
                     "V0403", # Family number
                     "V4729", # Person Weight
                     "V4732", # Family Weight
@@ -157,7 +157,7 @@ source("./R-scripts/0 LoadPackages.R")
   pnad2008 <- left_join(pnad2008pes, pnad2008dom)
   
 # Clean memory
-  rm(list=setdiff(ls(), c("pnad2008", "pnad2008dom")))
+  rm(list=setdiff(ls(), c("pnad2008", "pnad2008dom", "pnad2008pes")))
   gc(reset = T)
   
 
@@ -167,7 +167,7 @@ source("./R-scripts/0 LoadPackages.R")
 ###### 3. Add VARiables to pnad2008 ---------------------
 
 # year variable     
-  pnad2008[, year := 2008]
+  setDT(pnad2008)[, year := 2008]
   
 # Count variable     
   pnad2008[, vcount := 1]
@@ -193,19 +193,19 @@ source("./R-scripts/0 LoadPackages.R")
   table(pnad2008$AGE)
 
 # Create  age groups with 5y intervals
-  pnad2008$agegroup[pnad2008$v8005<5] <-"0-4"
-  pnad2008$agegroup[pnad2008$v8005>4 & pnad2008$v8005<14] <-"5-13"
-  pnad2008$agegroup[pnad2008$v8005>13 & pnad2008$v8005<18] <-"14-17"
-  pnad2008$agegroup[pnad2008$v8005>17 & pnad2008$v8005<25] <-"18-24"
-  pnad2008$agegroup[pnad2008$v8005>24 & pnad2008$v8005<30] <-"25-29"
-  pnad2008$agegroup[pnad2008$v8005>29 & pnad2008$v8005<35] <-"30-34"
-  pnad2008$agegroup[pnad2008$v8005>34 & pnad2008$v8005<40] <-"35-39"
-  pnad2008$agegroup[pnad2008$v8005>39 & pnad2008$v8005<45] <-"40-44"
-  pnad2008$agegroup[pnad2008$v8005>44 & pnad2008$v8005<50] <-"45-49"
-  pnad2008$agegroup[pnad2008$v8005>49 & pnad2008$v8005<55] <-"50-54"
-  pnad2008$agegroup[pnad2008$v8005>54 & pnad2008$v8005<60] <-"55-59"
-  pnad2008$agegroup[pnad2008$v8005>59 & pnad2008$v8005<65] <-"60-64"
-  pnad2008$agegroup[pnad2008$v8005>64 ] <-"65+"
+  pnad2008[ v8005<5, agegroup := "0-4"]
+  pnad2008[ v8005>4 & v8005<14, agegroup := "5-13"]
+  pnad2008[v8005>13 & v8005<18, agegroup := "14-17"]
+  pnad2008[v8005>17 & v8005<25, agegroup := "18-24"]
+  pnad2008[v8005>24 & v8005<30, agegroup := "25-29"]
+  pnad2008[v8005>29 & v8005<35, agegroup := "30-34"]
+  pnad2008[v8005>34 & v8005<40, agegroup := "35-39"]
+  pnad2008[v8005>39 & v8005<45, agegroup := "40-44"]
+  pnad2008[v8005>44 & v8005<50, agegroup := "45-49"]
+  pnad2008[v8005>49 & v8005<55, agegroup := "50-54"]
+  pnad2008[v8005>54 & v8005<60, agegroup := "55-59"]
+  pnad2008[v8005>59 & v8005<65, agegroup := "60-64"]
+  pnad2008[v8005>64, agegroup := "65+"]
   table(pnad2008$agegroup)
 
 
@@ -216,19 +216,21 @@ source("./R-scripts/0 LoadPackages.R")
   
   
 # Recode Sex variable, make it compatible with PNAD
-  pnad2008$v0302[pnad2008$v0302==2 ] <-"Men"
-  pnad2008$v0302[pnad2008$v0302==4 ] <-"Women"
+  pnad2008[, v0302 := as.character(v0302)]
+  pnad2008[v0302==2, v0302 := "Men"]
+  pnad2008[v0302==4, v0302 := "Women"]
   table(pnad2008$v0302)
 
-# Recode Education variable, make it compatible with PNAD
-  pnad2008$v4745[pnad2008$v4745==1 ] <-"Uneducated"
-  pnad2008$v4745[pnad2008$v4745==2 ] <-"Incomplete primary school"
-  pnad2008$v4745[pnad2008$v4745==3 ] <-"Complete primary school"
-  pnad2008$v4745[pnad2008$v4745==4 ] <-"Incomplete high school"
-  pnad2008$v4745[pnad2008$v4745==5 ] <-"Complete high school"
-  pnad2008$v4745[pnad2008$v4745==6 ] <-"Incomplete university degree"
-  pnad2008$v4745[pnad2008$v4745==7 ] <-"University degree"
-  pnad2008$v4745[pnad2008$v4745==8 ] <-NA
+# Recode Education variable
+  pnad2008[, v4745 := as.character(v4745)]
+  pnad2008[v4745==1, v4745 := "Uneducated"]
+  pnad2008[v4745==2, v4745 := "Incomplete primary school"]
+  pnad2008[v4745==3, v4745 := "Complete primary school"]
+  pnad2008[v4745==4, v4745 := "Incomplete high school"]
+  pnad2008[v4745==5, v4745 := "Complete high school"]
+  pnad2008[v4745==6, v4745 := "Incomplete university degree"]
+  pnad2008[v4745==7, v4745 := "University degree"]
+  pnad2008[v4745==8, v4745 := NA]
   table(pnad2008$v4745)
 
 
@@ -266,17 +268,17 @@ source("./R-scripts/0 LoadPackages.R")
 
 
 # Create variable Metropolitan area
-  pnad2008$metro[pnad2008$v4727 !=1 ] <-"Non-metropolitan area"
-  pnad2008$metro[pnad2008$uf==15 & pnad2008$v4727==1] <-"Belem"
-  pnad2008$metro[pnad2008$uf==23 & pnad2008$v4727==1] <-"Fortaleza"
-  pnad2008$metro[pnad2008$uf==26 & pnad2008$v4727==1] <-"Recife"
-  pnad2008$metro[pnad2008$uf==29 & pnad2008$v4727==1] <-"Salvador"
-  pnad2008$metro[pnad2008$uf==31 & pnad2008$v4727==1] <-"Belo Horizonte"
-  pnad2008$metro[pnad2008$uf==33 & pnad2008$v4727==1] <-"Rio de Janeiro"
-  pnad2008$metro[pnad2008$uf==35 & pnad2008$v4727==1] <-"Sao Paulo"
-  pnad2008$metro[pnad2008$uf==41 & pnad2008$v4727==1] <-"Curitiba"
-  pnad2008$metro[pnad2008$uf==43 & pnad2008$v4727==1] <-"Porto Alegre"
-  pnad2008$metro[pnad2008$uf==53 & pnad2008$v4727==1] <-"Federal District"
+  pnad2008[v4727 !=1 , metro := "Non-metropolitan area"]
+  pnad2008[uf==15 & v4727==1, metro := "Belem"]
+  pnad2008[uf==23 & v4727==1, metro := "Fortaleza"]
+  pnad2008[uf==26 & v4727==1, metro := "Recife"]
+  pnad2008[uf==29 & v4727==1, metro := "Salvador"]
+  pnad2008[uf==31 & v4727==1, metro := "Belo Horizonte"]
+  pnad2008[uf==33 & v4727==1, metro := "Rio de Janeiro"]
+  pnad2008[uf==35 & v4727==1, metro := "Sao Paulo"]
+  pnad2008[uf==41 & v4727==1, metro := "Curitiba"]
+  pnad2008[uf==43 & v4727==1, metro := "Porto Alegre"]
+  pnad2008[uf==53 & v4727==1, metro := "Federal District"]
   table(pnad2008$metro)
 
 gc(reset = T)
@@ -285,11 +287,11 @@ gc(reset = T)
 
 # Delete Missing values from Income variable (v4721 Monthly household income per capita)
 # to create new variable of income deciles
-#Antes da limpeza==391.868 obs. A lipeza tirou 11.573 cases -> 380.295
+#Antes da limpeza==391,868. A lipeza tirou 12,652 cases -> reamaining 379,216
 
 summary(pnad2008$v4721)
-pnad2008 <- pnad2008[pnad2008$v4721<999999999999, ] #elimina observacoes missing na var.  de renda Dom per capita.
-pnad2008 <- subset(pnad2008, v4721>= 0) #elimina observacoes NA
+pnad2008 <- pnad2008[ v4721 < 999999999999, ] #elimina observacoes missing na var.  de renda Dom per capita.
+pnad2008 <- pnad2008[ v4721 >= 0, ] #elimina observacoes NA
 summary(pnad2008$v4721)
 
 # Create  var. income deciles of Monthly household income per capitade
@@ -392,15 +394,17 @@ summary(pnad2008$v4721)
 
 
 #Recode Active Travel variable P040 into string
-  pnad2008$v1410[pnad2008$v1410==2] <- "Yes"
-  pnad2008$v1410[pnad2008$v1410==4] <- "No"
+  pnad2008[, v1410 := as.character(v1410)]
+  pnad2008[v1410==2, v1410 :="Yes"]
+  pnad2008[v1410==4, v1410 :="No"]
   table(pnad2008$v1410)
 
 # vehicle ownership variable, make it compatible with PNAD
-  pnad2008$v2032[pnad2008$v2032==2 ] <-"Car"
-  pnad2008$v2032[pnad2008$v2032==4 ] <-"Motorcycle"
-  pnad2008$v2032[pnad2008$v2032==6 ] <-"Car + Motorcycle"
-  pnad2008$v2032[pnad2008$v2032==8 ] <-"None"
+  pnad2008[, v2032 := as.character(v2032)]
+  pnad2008[v2032==2, v2032 := "Car"]
+  pnad2008[v2032==4, v2032 := "Motorcycle"]
+  pnad2008[v2032==6, v2032 := "Car + Motorcycle"]
+  pnad2008[v2032==8, v2032 := "None"]
   table(pnad2008$v2032)
 
   # Dummy for Vehicle ownership Variable, make it compatible with PNAD
@@ -427,7 +431,7 @@ summary(pnad2008$v4721)
 #                                                   ifelse(v9057==7,120,NA))))))
 
   ########## REcode Housegold DAta  ----------------
-  
+  setDT(pnad2008dom)
   pnad2008dom[uf < 20, region :="North"]
   pnad2008dom[uf > 20 & uf < 30, region :="Northeast"]
   pnad2008dom[uf > 30 & uf < 40, region :="Southeast"]
@@ -436,20 +440,22 @@ summary(pnad2008$v4721)
   table(pnad2008dom$region)
   
   # urban x rural
-  pnad2008dom$urban[pnad2008dom$v4105<4] <-"Urban"
-  pnad2008dom$urban[pnad2008dom$v4105>3 & pnad2008dom$v4105<9] <-"Rural"
+  pnad2008dom[v4105<4, urban := "Urban"]
+  pnad2008dom[v4105>3 & v4105<9, urban := "Rural"]
   table(pnad2008dom$urban)
   
   # vehicle ownership variable, make it compatible with PNAD
-  pnad2008dom$v2032[pnad2008dom$v2032==0 ] <-NA
-  pnad2008dom$v2032[pnad2008dom$v2032==2 ] <-"Car"
-  pnad2008dom$v2032[pnad2008dom$v2032==4 ] <-"Motorcycle"
-  pnad2008dom$v2032[pnad2008dom$v2032==6 ] <-"Car + Motorcycle"
-  pnad2008dom$v2032[pnad2008dom$v2032==8 ] <-"None"
+  pnad2008dom[, v2032 := as.character(v2032)]
+  pnad2008dom[v2032==2, v2032 := "Car"]
+  pnad2008dom[v2032==4, v2032 := "Motorcycle"]
+  pnad2008dom[v2032==6, v2032 := "Car + Motorcycle"]
+  pnad2008dom[v2032==8, v2032 := "None"]
+  pnad2008dom[v2032==0, v2032 := NA]
+  
   table(pnad2008dom$v2032)
   
   # Dummy for Vehicle ownership Variable, make it compatible with PNAD
-  pnad2008dom[, dummyVehicle := ifelse(v2032=="None" , 0, 1)] # If person declared height of 0 cm, consider it a missing value, otherwise, convert it to meters unit
+  pnad2008dom[, dummyVehicle := ifelse(v2032=="None" , 0, 1)]
   
   pnad2008dom$dummyVehicle <- factor(pnad2008dom$dummyVehicle, levels=c(1,0),
                                   labels=c("Yes","No"))

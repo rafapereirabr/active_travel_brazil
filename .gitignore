@@ -1,0 +1,13 @@
+*.xls
+*.txt
+*.sas
+data/PNS2013/Chaveamento PNS 2013.doc
+*.doc
+*.pdf
+data/PNS2013/06_xls.html
+*.zip
+data/PNS2013/Thumbs.db
+*.html
+*.Rds
+data/PNAD2008/dicPNAD2008.RData
+*.rtf

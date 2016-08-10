@@ -79,19 +79,18 @@ source("./R-scripts/0 LoadPackages.R")
 ########## 2. Recode Household data  ----------------
 
   # year variable     
-    pns2013dom[, year := 2013]
+    setDT(pns2013dom)[, year := 2013]
   
   
   # Urban vs Rural areas
-    pns2013dom$urban[pns2013dom$V0026==1 ] <-"Urban"
-    pns2013dom$urban[pns2013dom$V0026==2 ] <-"Rural"
+    pns2013dom[V0026==1, urban := "Urban"]
+    pns2013dom[V0026==2, urban := "Rural"]
   
   # Vehicle ownership Variable, make it compatible with PNAD
-    pns2013dom$v2032[pns2013dom$A01817 ==2 & pns2013dom$A020 >0 ] <- "Car" #  2
-    pns2013dom$v2032[pns2013dom$A01817 ==1 & pns2013dom$A020 <1 ] <- "Motorcycle" #  4 
-    pns2013dom$v2032[pns2013dom$A01817 ==1 & pns2013dom$A020 >0 ] <- "Car + Motorcycle" # 6 
-    pns2013dom$v2032[pns2013dom$A01817 ==2 & pns2013dom$A020 <1 ] <- "None" # 8
-
+    pns2013dom[A01817 ==2 & A020 >0, v2032 := "Car"] #  2
+    pns2013dom[A01817 ==1 & A020 <1, v2032 := "Motorcycle"] #  4 
+    pns2013dom[A01817 ==1 & A020 >0, v2032 := "Car + Motorcycle"] # 6 
+    pns2013dom[A01817 ==2 & A020 <1, v2032 := "None"] # 8
 
   # Dummy for Vehicle ownership Variable, make it compatible with PNAD
     pns2013dom[, dummyVehicle := ifelse(v2032=="None" , 0, 1)] # If person declared height of 0 cm, consider it a missing value, otherwise, convert it to meters unit
@@ -109,6 +108,7 @@ source("./R-scripts/0 LoadPackages.R")
 # Merge datasets
   pns2013 <- left_join(pns2013pes, pns2013dom)
 
+
 # clean memory
   rm(list=setdiff(ls(), c("pns2013", "pns2013dom")))
   gc(reset = T)
@@ -117,7 +117,7 @@ source("./R-scripts/0 LoadPackages.R")
 # 4: Add Variables to pns2013 data ---------------------------------
 
   # year variable     
-  pns2013[, year := 2013]
+  setDT(pns2013)[, year := 2013]
   
 # Count variable     
   pns2013[, vcount := 1]
@@ -183,13 +183,14 @@ source("./R-scripts/0 LoadPackages.R")
     
 
   # Recode Education Variable, make it compatible with PNAD
-    pns2013$v4745[pns2013$VDD004==1 ] <-"Uneducated"
-    pns2013$v4745[pns2013$VDD004==2 ] <-"Incomplete primary school"
-    pns2013$v4745[pns2013$VDD004==3 ] <-"Complete primary school"
-    pns2013$v4745[pns2013$VDD004==4 ] <-"Incomplete high school"
-    pns2013$v4745[pns2013$VDD004==5 ] <-"Complete high school"
-    pns2013$v4745[pns2013$VDD004==6 ] <-"Incomplete university degree"
-    pns2013$v4745[pns2013$VDD004==7 ] <-"University degree"
+    pns2013[VDD004==1, v4745 := "Uneducated"]
+    pns2013[VDD004==2, v4745 := "Incomplete primary school"]
+    pns2013[VDD004==3, v4745 := "Complete primary school"]
+    pns2013[VDD004==4, v4745 := "Incomplete high school"]
+    pns2013[VDD004==5, v4745 := "Complete high school"]
+    pns2013[VDD004==6, v4745 := "Incomplete university degree"]
+    pns2013[VDD004==7, v4745 := "University degree"]
+    
     table(pns2013$v4745)
     is.factor(pns2013$v4745)
     levels(pns2013$v4745)
@@ -213,49 +214,50 @@ source("./R-scripts/0 LoadPackages.R")
 table(pns2013$edugroup)
 
     # Recode Race variable into string
-    pns2013$C009[pns2013$C009==1] <-"White"
-    pns2013$C009[pns2013$C009==2] <-"Black"
-    pns2013$C009[pns2013$C009==3] <-"Asian"
-    pns2013$C009[pns2013$C009==4] <-"Brown"
-    pns2013$C009[pns2013$C009==5] <-"Indigenous"
-    pns2013$C009[pns2013$C009==9] <- NA
+    pns2013[, C009 := as.character(C009)]
+    pns2013[C009==1, C009 := "White"]
+    pns2013[C009==2, C009 := "Black"]
+    pns2013[C009==3, C009 := "Asian"]
+    pns2013[C009==4, C009 := "Brown"]
+    pns2013[C009==5, C009 := "Indigenous"]
+    pns2013[C009==9, C009 :=  NA]
     table(pns2013$C009)
 
 
   # Recode Sex Variable, make it compatible with PNAD
-    pns2013$v0302[pns2013$C006==1 ] <-"Men"
-    pns2013$v0302[pns2013$C006==2 ] <-"Women"
+    pns2013[C006==1, v0302 := "Men"]
+    pns2013[C006==2, v0302 := "Women"]
     table(pns2013$v0302)
 
   # Recode Urban Rural Variable, make it compatible with PNAD
-    pns2013$urban[pns2013$V0026==1 ] <-"Urban"
-    pns2013$urban[pns2013$V0026==2 ] <-"Rural"
+    pns2013[V0026==1 , urban := "Urban"]
+    pns2013[V0026==2 , urban := "Rural"]
         
     
   # Recode Metropolitan area Variable, make it compatible with PNAD
-    pns2013$v4727[pns2013$V0031==1 | pns2013$V0031==2] <- 1
-    pns2013$v4727[pns2013$V0031>2 ] <- 3
+    pns2013[V0031==1 | V0031==2, v4727 := 1]
+    pns2013[V0031>2, v4727 := 3]
   
 
   # Create Variable Metropolitan area
-    pns2013$metro[pns2013$V0031==4] <- "Non-metropolitan area"
-    pns2013$metro[pns2013$V0001==15 & pns2013$V0031<3] <-"Belem"
-    pns2013$metro[pns2013$V0001==23 & pns2013$V0031<3] <-"Fortaleza"
-    pns2013$metro[pns2013$V0001==26 & pns2013$V0031<3] <-"Recife"
-    pns2013$metro[pns2013$V0001==29 & pns2013$V0031<3] <-"Salvador"
-    pns2013$metro[pns2013$V0001==31 & pns2013$V0031<3] <-"Belo Horizonte"
-    pns2013$metro[pns2013$V0001==33 & pns2013$V0031<3] <-"Rio de Janeiro"
-    pns2013$metro[pns2013$V0001==35 & pns2013$V0031<3] <-"Sao Paulo"
-    pns2013$metro[pns2013$V0001==41 & pns2013$V0031<3] <-"Curitiba"
-    pns2013$metro[pns2013$V0001==43 & pns2013$V0031<3] <-"Porto Alegre"
-    pns2013$metro[pns2013$V0001==53 & pns2013$V0031<3] <-"Federal District"
+    pns2013[V0031==4, metro := "Non-metropolitan area"]
+    pns2013[V0001==15 & V0031<3, metro := "Belem"]
+    pns2013[V0001==23 & V0031<3, metro := "Fortaleza"]
+    pns2013[V0001==26 & V0031<3, metro := "Recife"]
+    pns2013[V0001==29 & V0031<3, metro := "Salvador"]
+    pns2013[V0001==31 & V0031<3, metro := "Belo Horizonte"]
+    pns2013[V0001==33 & V0031<3, metro := "Rio de Janeiro"]
+    pns2013[V0001==35 & V0031<3, metro := "Sao Paulo"]
+    pns2013[V0001==41 & V0031<3, metro := "Curitiba"]
+    pns2013[V0001==43 & V0031<3, metro := "Porto Alegre"]
+    pns2013[V0001==53 & V0031<3, metro := "Federal District"]
     
     
     
 
   # Recode Active Travel Variable, make it compatible with PNAD
-    pns2013$v1410[pns2013$P040==1 | pns2013$P040==2] <- "Yes"
-    pns2013$v1410[pns2013$P040==3 ] <- "No"
+    pns2013[P040==1 | P040==2, v1410 := "Yes"]
+    pns2013[P040==3, v1410 := "No"]
     table(pns2013$v1410)
 
 
@@ -272,9 +274,10 @@ table(pns2013$edugroup)
   
   
   # Recode Acctive Travel Variable P040 into string
-    pns2013$P040[pns2013$P040==1] <- "Yes, all the journey"
-    pns2013$P040[pns2013$P040==2] <- "Yes, part of the journey"
-    pns2013$P040[pns2013$P040==3 ] <- "No"
+    pns2013[, P040 := as.character(P040)]
+    pns2013[P040==1, P040 := "Yes, all the journey"]
+    pns2013[P040==2, P040 := "Yes, part of the journey"]
+    pns2013[P040==3, P040 :=  "No"]
     table(pns2013$P040)
 
 
@@ -319,12 +322,10 @@ table(pns2013$edugroup)
     # Create Household Income per Capita, compatible with PNAD 2008 data
      pns2013[, v4721 := totalhouseholdincome / C001 ] # C001  VDC001
      summary(pns2013$v4721)
-      
     
-    pns2013[totalhouseholdincome > 100000, .(V0022,VDC001,  totalhouseholdincome, v4721, C001)]
-    
-    
-    
+    # identify how many indovoduals with  Household Income per Capita == 0 
+    head(table(pns2013$v4721)) # 58,608
+
     
     ## \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     ## TEMPORARY FIX

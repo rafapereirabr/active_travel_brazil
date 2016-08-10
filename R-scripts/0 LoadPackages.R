@@ -1,6 +1,11 @@
 
 
 
+# Options
+  options(digits=3)   # number of digits to show
+  options(scipen=999) # disable scientific notation
+
+
 #####################  List of packages -------------------------------------------------------
 
 
