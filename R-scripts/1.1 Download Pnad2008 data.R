@@ -22,28 +22,14 @@ source("./R-scripts/0 LoadPackages.R")
 
 
 
-######  1. Dowbload Pnad2008 DATA ----------------
+######  1. Download Pnad2008 DATA ----------------
 
-# Download and unzip file
-  download.file("ftp://ftp.ibge.goV.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_anual/microdados/reponderacao_2001_2012/PNAD_reponderado_2008.zip", 
-                destfile="./data/PNAD2008.zip", quiet = FALSE)
-  dir.create("./data/PNAD2008")
-  unzip("./data/PNAD2008.zip", exdir="./data/PNAD2008", junkpaths=T)
+download_sourceData("PNAD", 2008, unzip = T, dest = "./data")
 
-  
-  
-  
   
   
 ###### 2. Read Pnad2008 DATA ----------------
 
-# Load Data set discription with Variables widths
-  load("./data/PNAD2008/dicPNAD2008.RData")
-
-  # conVert to data.table
-    setDT(dicpes2008)
-    setDT(dicdom2008)
-    
 
 # Indicate which columns will be read
     
@@ -98,60 +84,33 @@ source("./R-scripts/0 LoadPackages.R")
                    "V0233", # Household registered in 'saude da familia' program
                    "V0234") # time since registration
     
-  # Filter selected Variables
-    dicpes2008 <- dicpes2008[cod %in% mycolsPES, ]
-    dicdom2008 <- dicdom2008[cod %in% mycolsDOM, ]
-    
+
     
     
     
 ### Household data
 
-    # create end position of Variables
-      dicdom2008$fim <- dicdom2008$inicio + dicdom2008$tamanho -1
-      head(dicdom2008)
-      tail(dicdom2008)
+  # read data
+    pnad2008dom <-  read_PNAD("domicilios", 2008, root_path="./data", vars_subset = mycolsDOM)
       
+  # lower case column names 
+    colnames(pnad2008dom) <- tolower(colnames(pnad2008dom))
+      
+# cread state (uf) column
+    setDT(pnad2008dom)[, uf := as.numeric( substr(v0102,1,2)) ] # first and second digits of string v0102
     
-    # Read the data file .txt file
-      datafile <- "./data/PNAD2008/DOM2008.txt"
-      
-      pnad2008dom <- read_fwf(datafile,
-                       fwf_positions(start=dicdom2008$inicio, 
-                                     end=dicdom2008$fim, 
-                                     col_names = dicdom2008$cod))
-
-      
-    # make sure all Variables are 'numeric' class
-      pnad2008dom <- as.data.table(data.matrix(pnad2008dom))
-    
-# lower case column names 
-  colnames(pnad2008dom) <- tolower(colnames(pnad2008dom))
-      
-
 
 ### IndiViduals dataset
 
-    # create end position of Variables
-          dicpes2008$fim <- dicpes2008$inicio + dicpes2008$tamanho -1
-          head(dicpes2008)
-          tail(dicpes2008)
+  # read data
+    pnad2008pes <-  read_PNAD("pessoas", 2008, root_path="./data", vars_subset = mycolsPES)
+  
+  # lower case column names 
+    colnames(pnad2008pes) <- tolower(colnames(pnad2008pes))
+      
+  # cread state (uf) column
+    setDT(pnad2008pes)[, uf := as.numeric( substr(v0102,1,2)) ] # first and second digits of string v0102
     
-
-    # Read the data file .txt file
-      datafile <- "./data/PNAD2008/PES2008.TXT"
-      
-      pnad2008pes <- read_fwf(datafile,
-                 fwf_positions(start=dicpes2008$inicio, 
-                               end=dicpes2008$fim, 
-                               col_names = dicpes2008$cod))
-      
-    # make sure all Variables are 'numeric' class
-      pnad2008pes <- as.data.table(data.matrix(pnad2008pes))
-
-    # lower case column names 
-      colnames(pnad2008pes) <- tolower(colnames(pnad2008pes))
-      
 
 # Join IndiViduals and Household data sets
   pnad2008 <- left_join(pnad2008pes, pnad2008dom)
@@ -216,7 +175,6 @@ source("./R-scripts/0 LoadPackages.R")
   
   
 # Recode Sex variable, make it compatible with PNAD
-  pnad2008[, v0302 := as.character(v0302)]
   pnad2008[v0302==2, v0302 := "Men"]
   pnad2008[v0302==4, v0302 := "Women"]
   table(pnad2008$v0302)
@@ -389,6 +347,7 @@ summary(pnad2008$v4721)
 
 
 # now create the pre-stratified weight to be used in all of the survey designs
+  pnad2008[, v4610  := as.numeric(v4610)]
   pnad2008[, pre_wgt  := v4619 * v4610]
   summary(pnad2008$pre_wgt)
 
