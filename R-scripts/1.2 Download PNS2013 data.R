@@ -31,7 +31,7 @@ source("./R-scripts/0 LoadPackages.R")
 # 1:Donwload, save and read Pns2013 DATA----------------
     
 # Download and unzip file
-  download.file("ftp://ftp.ibge.gov.br/PNS/2013/microdados/pns_2013_microdados_2016_06_30.zip", destfile="./data/PNS2013.zip", quiet = FALSE)
+  download.file("ftp://ftp.ibge.gov.br/PNS/2013/microdados/pns_2013_microdados_2016_09_06.zip", destfile="./data/PNS2013.zip", quiet = FALSE, mode = 'wb')
   dir.create("./data/PNS2013")
   unzip("./data/PNS2013.zip", exdir="./data/PNS2013", junkpaths=T)
 

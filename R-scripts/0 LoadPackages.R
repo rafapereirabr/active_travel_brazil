@@ -23,12 +23,12 @@ list.of.packages <-
     
     # Manipulate data frames
     , "data.table"
+    , "plyr"
     , "dplyr"
     , "fasttime"
     , "pbapply"
     , "tidyr"
     , "reshape"
-    , "plyr"
     , "taRifx"
     , "sqldf"
     
