@@ -551,9 +551,9 @@ svytable(~v0101+v0302, design=sample.pnad08.14y)
 
 
 #Region
-svytable(~factor(v1411>3)+region, design=sample.pnad08.14y)
+svytable(~factor(actv_commutetime30==1)+region, design=sample.pnad08.14y)
 
-svyby(~factor( v1411>3 ) ,
+svyby(~factor( actv_commutetime30==1 ) ,
       ~region ,  
       design = sample.pnad08.14y,  
       vartype="ci",  level = 0.95,  svyciprop)
@@ -564,9 +564,9 @@ svyby(~factor( v1411>3 ) ,
 
 
 #Sexo
-svytable(~factor(v1411>3)+v0302, design=sample.pnad08.14y)
+svytable(~factor(actv_commutetime30==1)+v0302, design=sample.pnad08.14y)
 
-svyby(~factor( v1411>3 ) ,
+svyby(~factor( actv_commutetime30==1 ) ,
       ~v0302 ,  
       design = sample.pnad08.14y,  
       vartype="ci",  level = 0.95,  svyciprop 
@@ -578,8 +578,10 @@ svyby(~factor( v1411>3 ) ,
 
 
 #Age
+svytable(~factor(actv_commutetime30==1)+AGE, design=sample.pnad08.14y)
+
 svyby(
-  ~factor( v1411>3 ) ,
+  ~factor( actv_commutetime30==1 ) ,
   ~AGE ,  
   design = sample.pnad08.14y,  
   vartype="ci",  level = 0.95,  svyciprop
