@@ -365,50 +365,35 @@ table(pns2013$edugroup)
     summary(pns2013$F00802)
     summary(pns2013$VDF00102)
     
-  
-    #  Household Income per Capita, compatible with PNAD 2008 data
-    pns2013[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001, 
-                                    by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
-    
-    summary(pns2013$v4721)
-    # >Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    # >  0     340      670    1140    1190  146000  130415 
-    
-    # 1119 casos com RDPC igual a 0
-    head(table(pns2013$v4721))
+    # a <- pns2013[ !(is.na(E01602) & is.na(E01604) & is.na(E01802) & 
+    #                 is.na(E01804) & is.na(F00102) & is.na(F00702) & is.na(F00802) & is.na(VDF00102))]
+    # # 82268
+    # a <- pns2013[ is.na(E01602) & is.na(E01604) & is.na(E01802) & 
+    #                   is.na(E01804) & is.na(F00102) & is.na(F00702) & is.na(F00802) & is.na(VDF00102)]
+    # 
+    # a <- pns2013[ E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102 ] 
+    # 
+    # 
+    # a[, v4721 := NULL]
+    # #  Household Income per Capita, compatible with PNAD 2008 data
+    # a[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001, 
+    #                                 by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
+    # summary(a$v4721)
+    # 
+    # 
+    # summary(pns2013$v4721)
+    # # >Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    # # >  0     340      670    1140    1190  146000  130415 
+    # 
+    # # 1119 casos com RDPC igual a 0
+    # head(table(pns2013$v4721))
 
     
     
         
         
         
-#         
-# 
-# 
-#         svyquantile(~v4721, sample.pns13.pos, quantile=c(0.25,0.5,0.75), na.rm=T)
-#         svymean(~v4721, sample.pns13.pos, na.rm=T)
-#         
-#         
-# tab <- svytable(~v4721, sample.pns13.pos) %>% data.table()
-#         
-# 
-# head(tab)
-# tail(tab)
-#                
-#                
-#     # identify how many indovoduals with  Household Income per Capita == 0 
-#     head(table(aaa$v4721)) # 58,608
-# 
-#     
-#     ## \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-#     ## TEMPORARY FIX
-#     # DELETE individuals with household income equals to Zero (58,608 cases)
-#     pns2013 <- pns2013[v4721 > 0,] 
-# 
-#       
-# 
-#       
-#       
+
 # ########### Create income quantiles
 #     
 #       # Create  var. income deciles of Monthly household income per capitade

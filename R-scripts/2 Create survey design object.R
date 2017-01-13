@@ -129,6 +129,11 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
   
 ############## 2. PNS Income quantiles  -----------
   
+  # descriptive statistics of RDPC
+    svyquantile(~v4721, pns13.18y.design, quantile=c(0.25,0.5,0.75), na.rm=T)
+    svymean(~v4721, pns13.18y.design, na.rm=T)
+    
+
   # DECILE BR: Calculate decile intervals considering Sample Design
     decilebr <- svyquantile(~v4721, design = sample.pns13.pos, quantiles = seq(0, 1, by=0.1), method = "linear", ties="rounded", na.rm=T)
     
@@ -294,7 +299,7 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
    
    
    
-##### Household Design  -----------
+##### 7. Household Design  -----------
 
   # PNAD households Survey design
   
@@ -328,14 +333,14 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
 
 
     
-########## 5. Save complex sample survey design files  ----------------
+########## 8. Save complex sample survey design files  ----------------
   
   save( pnad08.18y.design , file = './data/pnad08.18y.design.rda' )
   save( pns13.18y.design , file = './data/pns13.18y.design.rda' )
   
 
     
-########## 6. Save modified DAta files  ----------------
+########## 9. Save modified DAta files  ----------------
   
   saveRDS(pns2013, file="./data/pns2013.Rds")
   saveRDS(pnad2008, file="./data/pnad2008.Rds")
