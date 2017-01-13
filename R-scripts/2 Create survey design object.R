@@ -11,7 +11,7 @@ setwd("R:/Dropbox/github/active_travel_brazil")
 
 
 ##################### Load packages -------------------------------------------------------
-source("./R scripts/0 LoadPackages.R")
+source("./R-scripts/0 LoadPackages.R")
 
 
 
@@ -34,7 +34,9 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                 v0302,   # pnad compat_ Sex
                 v4727,   # pnad compat_ Metropolitan area
                 v1410,   # pnad compat_ Active Travel
-                v2032,  # pnad compat_ Car or motorcycle ownership
+                v2032,   # pnad compat_ Car or motorcycle ownership
+                v4721,   # pnad Household income per capita
+                V0015,   # type of interview
                 V0001,   # state
                 C006,    # sex
                 C009,    # race
@@ -66,8 +68,8 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                 V0029,   # person sample weight without calibratio
                 V00291,  # person sample weight with calibration
                 V00292,  # Population projection
-                V00283,  # Domínio de pós-estrato 1
-                V00293,  # Domínio de pós-estrato 2
+                V00283,  # Dominio de pos-estrato 1
+                V00293,  # Dominio de pos-estrato 2
                 A01817,  # Motorcycle ownership
                 A020,    # Car ownership (number of cars)
                 v2032,   # Vehicle in the household, compatible with PNAD
@@ -75,14 +77,16 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                 v1410, # dummy active travel , compatible with PNAD
                 year, region,
                 AGE, agegroup, edugroup, urban, metro, vcount, 
-                actv_commutetime30, actv_commutetime,actv_traveltimehabacts,total_actvtraveltime, physicallyactive30, # commute variables
-                totalhouseholdincome, v4721, decileBR, quintileBR, quintileRegion, quartileRegion, quintileMetro, quartileMetro) # income variables
-                
+                actv_commutetime30, actv_commutetime,actv_traveltimehabacts,total_actvtraveltime, physicallyactive30 # commute variables
+                )
+    
+    
+
     
 
                 
 
-############## PNS Create survey design  -----------
+############## 1. PNS Create survey design  -----------
 
   # There should be no Missings (NA) in Design Variables
   # Count  missing values (NAs)
@@ -119,11 +123,80 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
   #Subset design population above 18 years old
   pns13.18y.design <- subset(sample.pns13.pos, C008>17)
   
+
+  
+  
+  
+############## 2. PNS Income quantiles  -----------
+  
+  # DECILE BR: Calculate decile intervals considering Sample Design
+    decilebr <- svyquantile(~v4721, design = sample.pns13.pos, quantiles = seq(0, 1, by=0.1), method = "linear", ties="rounded", na.rm=T)
+    
+    # Categorize individuals according to their decile position
+      pns2013[ , decileBR :=  cut( v4721 , decilebr, include.lowest= TRUE, labels=1:10, na.rm=T ) ]
+      table(pns2013$decileBR)
+    
+
+  # Quintile BR: Calculate decile intervals considering Sample Design
+      quintilebr <- svyquantile(~v4721, design = sample.pns13.pos, quantiles = seq(0, 1, by=0.2), method = "linear", ties="rounded", na.rm=T)
+      
+      # Categorize individuals according to their quintile position
+      pns2013[ , quintileBR :=  cut( v4721 , quintilebr, include.lowest= TRUE, labels=1:5, na.rm=T ) ]
+      table(pns2013$quintileBR)
+      
+      
+          
+  # Quntile metro: Calculate Quntile intervals considering Sample Design
+    quintiles_metro <- svyby(~v4721, ~metro, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+    quintiles_metro <- data.table(quintiles_metro)
+  
+    # Categorize individuals according to their quintile position
+      for (i in c(quintiles_metro$metro) ) { 
+        quintile <- as.vector( quintiles_metro[metro== i , c(2:7)] )
+        pns2013[ metro== i, quintileMetro :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+      }
+    
+    table(pns2013$quintileMetro, pns2013$metro)
+    
+    
+    
+  # Quintile Region: Calculate Quntile intervals considering Sample Design
+    quintiles_region <- svyby(~v4721, ~region, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+    quintiles_region <- data.table(quintiles_region)
+    
+    # Categorize individuals according to their quintile position
+      for (i in c(quintiles_region$region) ) { 
+        quintile <- as.vector( quintiles_region[region== i , c(2:7)] )
+        pns2013[ region== i, quintileRegion :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+      }
+    
+    table(pns2013$quintileRegion, pns2013$region)
     
   
   
+    
   
-############## PNAD Create survey design  -----------
+    
+############## 3. UPDATE PNS Create survey design  -----------
+  
+  pns2013Det <- pns2013[M001==1, ]
+  options( survey.lonely.psu = "adjust" )  # ??survey.lonely.psu    
+  sample.pns13 <- svydesign(data = pns2013Det,
+                            id = ~UPA_PNS, #PSU
+                            strata = ~V0024, #Strat
+                            weights=~V0029, #PesoPessoa: usar peso original
+                            nest = TRUE)
+  ## post-estratification of sample design
+  post_pop <- unique( subset(pns2013Det, select= c(V00293,V00292) ))
+  names(post_pop)<-c("V00293","Freq")
+  sample.pns13.pos <- postStratify(sample.pns13, ~V00293, post_pop)
+  pns13.18y.design <- subset(sample.pns13.pos, C008>17)
+  
+  
+  
+  
+  
+############## 4. PNAD Create survey design  -----------
 
   #define como imputar variancia quando houver apenas um domicilio (PSU) no estrato
    options( survey.lonely.psu = "adjust" )  # ??survey.lonely.psu 
@@ -149,6 +222,78 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
 
   
     
+############## 5. PNAD Income quantiles  -----------
+   
+   # DECILE BR: Calculate decile intervals considering Sample Design
+   decilebr <- svyquantile(~v4721, design = sample.pos, quantiles = seq(0, 1, by=0.1), method = "linear", ties="rounded", na.rm=T)
+   
+   # Categorize individuals according to their decile position
+   pnad2008[ , decileBR :=  cut( v4721 , decilebr, include.lowest= TRUE, labels=1:10, na.rm=T ) ]
+   table(pnad2008$decileBR)
+   
+   
+   # Quintile BR: Calculate decile intervals considering Sample Design
+     quintilebr <- svyquantile(~v4721, design = sample.pos, quantiles = seq(0, 1, by=0.2), method = "linear", ties="rounded", na.rm=T)
+   
+     # Categorize individuals according to their quintile position
+        pnad2008[ , quintileBR :=  cut( v4721 , quintilebr, include.lowest= TRUE, labels=1:5, na.rm=T ) ]
+        table(pns2013$quintileBR)
+     
+   
+   
+   # Quntile metro: Calculate Quntile intervals considering Sample Design
+   quintiles_metro <- svyby(~v4721, ~metro, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+   quintiles_metro <- data.table(quintiles_metro)
+   
+   # Categorize individuals according to their quintile position
+   for (i in c(quintiles_metro$metro) ) { 
+     quintile <- as.vector( quintiles_metro[metro== i , c(2:7)] )
+     pnad2008[ metro== i, quintileMetro :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+   }
+   
+   table(pnad2008$quintileMetro, pnad2008$metro)
+   
+   
+   # Quintile Region: Calculate Quntile intervals considering Sample Design
+   quintiles_region <- svyby(~v4721, ~region, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+   quintiles_region <- data.table(quintiles_region)
+   
+   # Categorize individuals according to their quintile position
+   for (i in c(quintiles_region$region) ) { 
+     quintile <- as.vector( quintiles_region[region== i , c(2:7)] )
+     pnad2008[ region== i, quintileRegion :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+   }
+   
+   table(pnad2008$quintileRegion, pnad2008$region)
+   
+   
+   
+   
+
+############## 6. UPDATE PNAD survey design  -----------
+   
+   options( survey.lonely.psu = "adjust" )  # ??survey.lonely.psu 
+   sample.pnad08 <- svydesign(
+     data = pnad2008,
+     id = ~v4618, #PSU
+     strata = ~v4617, #Strat
+     weights = ~pre_wgt, #person weight v4729
+     nest = TRUE )
+   
+   # postStratify pnad2008 (Djalma suggestion)
+   post.pop <- unique(data.frame(v4609=as.character(pnad2008$v4609), Freq= as.numeric(pnad2008$v4609)))
+   sample.pos <- postStratify(design=sample.pnad08, strata=~v4609, population=post.pop)
+   pnad08.18y.design <- subset(sample.pos, v8005>=17)
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 ##### Household Design  -----------
 
   # PNAD households Survey design
@@ -183,12 +328,16 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
 
 
     
+########## 5. Save complex sample survey design files  ----------------
   
-  # save the complex sample survey design
   save( pnad08.18y.design , file = './data/pnad08.18y.design.rda' )
   save( pns13.18y.design , file = './data/pns13.18y.design.rda' )
   
 
     
+########## 6. Save modified DAta files  ----------------
+  
+  saveRDS(pns2013, file="./data/pns2013.Rds")
+  saveRDS(pnad2008, file="./data/pnad2008.Rds")
   
   
