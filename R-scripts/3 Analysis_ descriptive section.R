@@ -117,7 +117,7 @@ tab1[, quintileBR := factor(quintileBR, levels=c(1:5), labels = c("Q1 (poorest)"
 
 
 # save table 1
-  write_csv(tab1, path="./output_tables/tab1.csv")
+  fwrite(tab1, "./output_tables/tab1.csv")
 
 
 
@@ -315,7 +315,7 @@ tab2[, quintileBR := factor(quintileBR, levels=c(1:5), labels = c("Q1 (poorest)"
 
 
 # save table 2
-write_csv(tab2, path="./output_tables/tab2.csv")
+fwrite(tab2, "./output_tables/tab2.csv")
 
 
 

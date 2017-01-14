@@ -68,11 +68,15 @@ if(length(new.packages)) install.packages(new.packages)
 
   
 # check installation of microdadosBrasil package
+  library(utils)
+  remove.packages("microdadosBrasil")
+  library(microdadosBrasil)
+  
+  
   library(devtools)
   library(stringi) 
   new.packages <- !('microdadosBrasil' %in% installed.packages()[,"Package"])
-  if(length(new.packages)) devtools::install_github("lucasmation/microdadosBrasil", ref = "subset-variables")
-  
+  if(length(new.packages)) devtools::install_github("lucasmation/microdadosBrasil")
   library(microdadosBrasil)
 
 #####################  Load libraries  -------------------------------------------------------

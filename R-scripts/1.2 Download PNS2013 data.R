@@ -10,9 +10,6 @@
 
 
 
-
-
-
 ##################### Set working directory -------------------------------------------------------
   setwd("R:/Dropbox/github/active_travel_brazil") # test
 
@@ -30,103 +27,94 @@ source("./R-scripts/0 LoadPackages.R")
 
 # 1:Download Pns2013 DATA----------------
     
-# Download and unzip file
-  download.file("ftp://ftp.ibge.gov.br/PNS/2013/microdados/pns_2013_microdados_2016_12_02.zip", destfile="./data/PNS2013.zip", quiet = FALSE)
-  dir.create("./data/PNS2013")
-  unzip("./data/PNS2013.zip", exdir="./data/PNS2013", junkpaths=T)
-
+  download_sourceData("PNS", 2013, unzip = T)
+  
   
 
+
+  
+  
+  
+  
+  
 # 2:Read Pns2013 DATA----------------
   
-#Household data - Read .txt data using SAS instructions
-    sas_file <- "./data/PNS2013/input_DOMPNS2013.sas" #SAS instructions
-    sas_file <- parse.SAScii(sas_file)
-    datafile <- "./data/PNS2013/DOMPNS2013.txt"
-  
-    # Read the .txt file
-      pns2013dom <-   read_fwf(datafile,
-                               fwf_widths(dput(sas_file$width),
-                                          col_names=(dput(sas_file$varname))),
-                               progress = interactive())
+    pns2013dom <- read_PNS("domicilios", i = 2013, root_path = ".")
     
     # make sure all variables are 'numeric' class
-      pns2013dom <- data.table(data.matrix(pns2013dom))
+      setDT(pns2013dom)
+      changeCols <- colnames(pns2013dom)[6:69]
+      pns2013dom[,(changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
       
-
+      
+      
     # clean memory
       gc(reset = T)
 
       
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO#   
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO#   
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO#   
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO#   
-# ## Indicate which columns will be read from .txt files
-#   myvariblesPES <- c(
-#                        "V0001"     # state
-#                      , "C006"      # sex
-#                      , "C009"      # race
-#                      , "C008"      # age
-#                      , "VDD004"    # Educational attainment
-#                      , "P040"      # Active commute
-#                      , "P04101"    # Active commute time (hours)
-#                      , "P04102"    # Active commute time (minutes)
-#                      , "P04301"    # active travel to habitual activities
-#                      , "P04302"    # active travel time to habitual activities
-#                      , "P00101"    # Weight
-#                      , "P00401"    # Height
-#                      , "N001"      # health perception
-#                      , "O009"      # car accident
-#                      , "O011"      # travel mode when injured
-#                      , "O014"      # accident hindered habitual activities
-#                      , "O020"      # any sequel and / or disability due to this traffic accident
-#                      , "Q002"      # Ever diagnosed with hypertension 
-#                      , "Q003"      # age at diagnosis for hypertension
-#                      , "Q030"      # Ever diagnosed with diabetes 
-#                      , "Q031"      # age at diagnosis for diabetes
-#                      , "Q060"      # Ever diagnosed with high cholesterol 
-#                      , "Q061"      # age at diagnosis for high cholesterol
-#                      , "V0025"     # person selected for long questionaire
-#                      , "M001"      # Type of interview
-#                      , "UPA_PNS"   # UPA
-#                      , "V0024"     # Strata
-#                      , "V0029"     # person sample weight without calibratio
-#                      , "V00291"    # person sample weight with calibration
-#                      , "V00292"    # Population projection
-#                      , "V00283"    # Dominio de pos-estrato 1
-#                      , "V00293"    # Dominio de pos-estrato 2
-#                      , "C004"      # Condição no domicílio
-#                      , "V0006_PNS" # Número de ordem do domicílio na PNS
-#                      , "E01602"   # Income
-#                      , "E01604"    # Income
-#                      , "E01802"    # Income
-#                      , "E01804"    # Income
-#                      , "F00102"    # Income
-#                      , "F00702"    # Income
-#                      , "F00802"    # Income
-#                      , "VDF00102"    # Income
-#                      )
+
+      
+      
+## Indicate which columns will be read from .txt files
+  myvariblesPES <- c(
+                       "V0001"     # state
+                     , "C006"      # sex
+                     , "C009"      # race
+                     , "C008"      # age
+                     , "VDD004"    # Educational attainment
+                     , "P040"      # Active commute
+                     , "P04101"    # Active commute time (hours)
+                     , "P04102"    # Active commute time (minutes)
+                     , "P04301"    # active travel to habitual activities
+                     , "P04302"    # active travel time to habitual activities
+                     , "P00101"    # Weight
+                     , "P00401"    # Height
+                     , "N001"      # health perception
+                     , "O009"      # car accident
+                     , "O011"      # travel mode when injured
+                     , "O014"      # accident hindered habitual activities
+                     , "O020"      # any sequel and / or disability due to this traffic accident
+                     , "Q002"      # Ever diagnosed with hypertension
+                     , "Q003"      # age at diagnosis for hypertension
+                     , "Q030"      # Ever diagnosed with diabetes
+                     , "Q031"      # age at diagnosis for diabetes
+                     , "Q060"      # Ever diagnosed with high cholesterol
+                     , "Q061"      # age at diagnosis for high cholesterol
+                     , "V0025"     # person selected for long questionaire
+                     , "M001"      # Type of interview
+                     , "UPA_PNS"   # UPA
+                     , "V0024"     # Strata
+                     , "V0029"     # person sample weight without calibratio
+                     , "V00291"    # person sample weight with calibration
+                     , "V00292"    # Population projection
+                     , "V00283"    # Dominio de pos-estrato 1
+                     , "V00293"    # Dominio de pos-estrato 2
+                     , "C004"      # Condição no domicílio
+                     , "V0006_PNS" # Número de ordem do domicílio na PNS
+                     , "E01602"   # Income
+                     , "E01604"    # Income
+                     , "E01802"    # Income
+                     , "E01804"    # Income
+                     , "F00102"    # Income
+                     , "F00702"    # Income
+                     , "F00802"    # Income
+                     , "VDF00102"    # Income
+                     )
 
   
-      
- 
+  # read data
+    pns2013pes <- read_PNS('pessoas', 2013, 
+                           vars_subset = myvariblesPES, 
+                           root_path = ".")
+
      
-#Individuals data - Read .txt data using SAS instructions
-      sas_file <- "./data/PNS2013/input_PESPNS2013.sas" #SAS instructions
-      sas_file <- parse.SAScii(sas_file)
-      #sas_file <- setDT(sas_file)[varname %in% myvariblesPES] # filter documentation
-      datafile <- "./data/PNS2013/PESPNS2013.txt"
-      
-      
-    # Read the .txt file
-    pns2013pes <-   read_fwf(datafile,
-                       fwf_widths(dput(sas_file$width),
-                                  col_names=(dput(sas_file$varname))),
-                       progress = interactive())
+
+  # make sure numeric variables are 'numeric' class
+    setDT(pns2013pes)
     
-    # make sure all variables are 'numeric' class
-    pns2013pes <- data.table(data.matrix(pns2013pes))
+    changeCols <- colnames(pns2013pes)[5:42]
+    pns2013pes[,(changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
+    
     
 
 # clean memory
@@ -365,28 +353,19 @@ table(pns2013$edugroup)
     summary(pns2013$F00802)
     summary(pns2013$VDF00102)
     
-    # a <- pns2013[ !(is.na(E01602) & is.na(E01604) & is.na(E01802) & 
-    #                 is.na(E01804) & is.na(F00102) & is.na(F00702) & is.na(F00802) & is.na(VDF00102))]
-    # # 82268
-    # a <- pns2013[ is.na(E01602) & is.na(E01604) & is.na(E01802) & 
-    #                   is.na(E01804) & is.na(F00102) & is.na(F00702) & is.na(F00802) & is.na(VDF00102)]
-    # 
-    # a <- pns2013[ E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102 ] 
-    # 
-    # 
-    # a[, v4721 := NULL]
-    # #  Household Income per Capita, compatible with PNAD 2008 data
-    # a[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001, 
-    #                                 by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
-    # summary(a$v4721)
-    # 
-    # 
-    # summary(pns2013$v4721)
+
+    #  Household Income per Capita, compatible with PNAD 2008 data
+    pns2013[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001,
+                                    by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
+    summary(pns2013$v4721)
+    
+    
+    summary(pns2013$v4721)
     # # >Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
     # # >  0     340      670    1140    1190  146000  130415 
     # 
     # # 1119 casos com RDPC igual a 0
-    # head(table(pns2013$v4721))
+    head(table(pns2013$v4721))
 
     
     
