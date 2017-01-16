@@ -27,15 +27,8 @@ source("./R-scripts/0 LoadPackages.R")
 
 # 1:Download Pns2013 DATA----------------
     
-  download_sourceData("PNS", 2013, unzip = T)
-  
-  
+  download_sourceData("PNS", 2013, unzip = T, root_path = "./data")
 
-
-  
-  
-  
-  
   
 # 2:Read Pns2013 DATA----------------
   
