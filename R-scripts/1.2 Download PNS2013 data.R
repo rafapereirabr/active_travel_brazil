@@ -32,7 +32,7 @@ source("./R-scripts/0 LoadPackages.R")
   
 # 2:Read Pns2013 DATA----------------
   
-    pns2013dom <- read_PNS("domicilios", i = 2013, root_path = ".")
+    pns2013dom <- read_PNS("domicilios", i = 2013, root_path = "./data")
     
     # make sure all variables are 'numeric' class
       setDT(pns2013dom)

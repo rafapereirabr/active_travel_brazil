@@ -28,8 +28,6 @@ source("./R-scripts/0 LoadPackages.R")
 
 
 
-
-
 ############ Load Survey Design Objects ############
 
 
@@ -37,7 +35,9 @@ load('./data/pnad08.18y.design.rda')
 load('./data/pns13.18y.design.rda')
 
   
-  
+
+
+
 ######################!!!!!! RESULTS   RESULTS  RESULTS ###################### 
 ######################!!!!!! RESULTS   RESULTS  RESULTS ###################### 
 ######################!!!!!! RESULTS   RESULTS  RESULTS ###################### 
@@ -79,6 +79,7 @@ tab1_age <- svyby(~factor( dummyVehicle=="Yes") ,
                   ~quintileBR+AGE, svyciprop ,
                   design = pns13.18y.design ,
                   vartype="ci", level = 0.95) %>% setDT()
+
 
 
 tab1_actvcommute <- svyby(~factor( dummyVehicle=="Yes" ) ,

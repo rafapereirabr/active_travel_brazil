@@ -68,11 +68,6 @@ if(length(new.packages)) install.packages(new.packages)
 
   
 # check installation of microdadosBrasil package
-  library(utils)
-  remove.packages("microdadosBrasil")
-  library(microdadosBrasil)
-  
-  
   library(devtools)
   library(stringi) 
   new.packages <- !('microdadosBrasil' %in% installed.packages()[,"Package"])
