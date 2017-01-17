@@ -252,65 +252,64 @@ pnad2008 <- pnad2008[ v4721 < 999999999999, ] #elimina observacoes missing na va
 pnad2008 <- pnad2008[ v4721 >= 0, ] #elimina observacoes NA
 summary(pnad2008$v4721)
 
-# Create  var. income deciles of Monthly household income per capitade
-  pnad2008[, decileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
-                                                               probs=seq(0, 1, by=0.1), na.rm=T),
-                                        include.lowest= TRUE, labels=1:10))]
-  
-  # Checking Table
-  table(pnad2008$decileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
-
-  
-# Create  var. income quintile of Monthly household income per capitade
- pnad2008[, quintileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
-                                                                probs=seq(0, 1, by=0.2), na.rm=T),
-                                         include.lowest= TRUE, labels=1:5))]
-  
-  
- # function to Create Quintile for different regions
- funQuintReg <- function(x){quintileRegion <- as.numeric(cut(x[, v4721], labels=c(1:5),
-                                                             breaks=quantile(x[, v4721], seq(0,1, 0.2), na.rm=T),
-                                                             include.lowest = TRUE))
-                                                       cbind(x, quintileRegion)
-                                                        }
- 
- # function to Create Quartile for different regions
- funQuartReg <- function(x){quartileRegion <- as.numeric(cut(x[, v4721], labels=c(1:4),
-                                                             breaks=quantile(x[, v4721], seq(0,1, 0.25), na.rm=T),
-                                                             include.lowest = TRUE))
-                                                         cbind(x, quartileRegion)
-                                                         }
- 
- 
- # function to Create Quintile for different Metro Areas
- funQuintMetro <- function(x){quintileMetro <- as.numeric(cut(x[, v4721], labels=c(1:5),
-                                                             breaks=quantile(x[, v4721], seq(0,1, 0.2), na.rm=T),
-                                                             include.lowest = TRUE))
- cbind(x, quintileMetro)
- }
- 
- # function to Create Quartile for different Metro Areas
- funQuartMetro <- function(x){quartileMetro <- as.numeric(cut(x[, v4721], labels=c(1:4),
-                                                             breaks=quantile(x[, v4721], seq(0,1, 0.25), na.rm=T),
-                                                             include.lowest = TRUE))
- cbind(x, quartileMetro)
- }
- 
- 
- # create regional income deciles, quintiles and quartiles
- pnad2008 <- do.call(rbind, lapply(split(pnad2008, pnad2008[, region]), funQuintReg)) ; gc(reset = T)
- pnad2008 <- do.call(rbind, lapply(split(pnad2008, pnad2008[, region]), funQuartReg)) ; gc(reset = T)
- pnad2008 <- do.call(rbind, lapply(split(pnad2008, pnad2008[, metro]), funQuintMetro)) ; gc(reset = T)
- pnad2008 <- do.call(rbind, lapply(split(pnad2008, pnad2008[, metro]), funQuartMetro)) ; gc(reset = T)
- 
- head(pnad2008)
- 
- # 2-Way Frequency Table -  Numero de casos dentro de cada Decil tem que ser igual/proximo
- table(pnad2008$quintileRegion, pnad2008$region)
- table(pnad2008$quartileRegion, pnad2008$region)
- 
- table(pnad2008$quintileMetro, pnad2008$metro)
- table(pnad2008$quartileMetro, pnad2008$metro)
+# to be deleted #
+# to be deleted #
+# to be deleted #
+# to be deleted #
+# # Create  var. income deciles of Monthly household income per capitade
+#   pnad2008[, decileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                                                probs=seq(0, 1, by=0.1), na.rm=T),
+#                                         include.lowest= TRUE, labels=1:10))]
+#   
+#   # Checking Table
+#   table(pnad2008$decileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
+# 
+#   
+# # Create  var. income quintile of Monthly household income per capitade
+#  pnad2008[, quintileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                                                 probs=seq(0, 1, by=0.2), na.rm=T),
+#                                          include.lowest= TRUE, labels=1:5))]
+#   
+#   
+# # Create Quintile for different regions and different metros
+#   pnad2008[, quintileRegion := as.numeric( cut(v4721, 
+#                                               breaks=quantile(v4721,
+#                                               probs=seq(0, 1, by=0.2), na.rm=T),
+#                                               include.lowest= TRUE, labels=1:5)),
+#                                           by = region]
+#   
+#   pnad2008[, quintileMetro := as.numeric( cut(v4721, 
+#                                                breaks=quantile(v4721,
+#                                                probs=seq(0, 1, by=0.2), na.rm=T),
+#                                                include.lowest= TRUE, labels=1:5)),
+#                                           by = metro]
+#   
+#            
+# # Create Quartile for different regions and different metros
+#   pnad2008[, quartileRegion := as.numeric( cut(v4721, 
+#                                                breaks=quantile(v4721,
+#                                                probs=seq(0, 1, by=0.25), na.rm=T),
+#                                                include.lowest= TRUE, labels=1:4)),
+#                                           by = region]
+#   
+#   
+# 
+#   pnad2008[, quartileMetro := as.numeric( cut(v4721, 
+#                                                breaks=quantile(v4721,
+#                                                probs=seq(0, 1, by=0.25), na.rm=T),
+#                                                include.lowest= TRUE, labels=1:4)),
+#                                           by = metro]
+#   
+#   
+#  
+#  head(pnad2008)
+#  
+#  # 2-Way Frequency Table -  Numero de casos dentro de cada Decil tem que ser igual/proximo
+#  table(pnad2008$quintileRegion, pnad2008$region)
+#  table(pnad2008$quartileRegion, pnad2008$region)
+#  
+#  table(pnad2008$quintileMetro, pnad2008$metro)
+#  table(pnad2008$quartileMetro, pnad2008$metro)
  
 
   

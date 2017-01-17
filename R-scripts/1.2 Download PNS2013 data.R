@@ -10,9 +10,6 @@
 
 
 
-
-
-
 ##################### Set working directory -------------------------------------------------------
   setwd("R:/Dropbox/github/active_travel_brazil") # test
 
@@ -28,48 +25,91 @@ source("./R-scripts/0 LoadPackages.R")
 
 
 
-# 1:Donwload, save and read Pns2013 DATA----------------
+# 1:Download Pns2013 DATA----------------
     
-# Download and unzip file
-  download.file("ftp://ftp.ibge.gov.br/PNS/2013/microdados/pns_2013_microdados_2016_09_06.zip", destfile="./data/PNS2013.zip", quiet = FALSE, mode = 'wb')
-  dir.create("./data/PNS2013")
-  unzip("./data/PNS2013.zip", exdir="./data/PNS2013", junkpaths=T)
+  download_sourceData("PNS", 2013, unzip = T, root_path = "./data")
 
   
+# 2:Read Pns2013 DATA----------------
   
-#Household data - Read .txt data using SAS instructions
-    sas_file <- "./data/PNS2013/input DOMPNS2013.sas" #SAS instructions
-    sas_file <- parse.SAScii(sas_file)
-    datafile <- "./data/PNS2013/DOMPNS2013.txt"
-    
-    # Read the .txt file
-      pns2013dom <-   read_fwf(datafile,
-                               fwf_widths(dput(sas_file$width),
-                                          col_names=(dput(sas_file$varname))),
-                               progress = interactive())
+    pns2013dom <- read_PNS("domicilios", i = 2013, root_path = ".")
     
     # make sure all variables are 'numeric' class
-      pns2013dom <- as.data.table(data.matrix(pns2013dom))
+      setDT(pns2013dom)
+      changeCols <- colnames(pns2013dom)[6:69]
+      pns2013dom[,(changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
       
-
+      
+      
     # clean memory
       gc(reset = T)
 
       
-#Individuals data - Read .txt data using SAS instructions
-    sas_file <- "./data/PNS2013/input PESPNS2013.sas" #SAS instructions
-    sas_file <- parse.SAScii(sas_file)
-    datafile <- "./data/PNS2013/PESPNS2013.txt"
+
+      
+      
+## Indicate which columns will be read from .txt files
+  myvariblesPES <- c(
+                       "V0001"     # state
+                     , "C006"      # sex
+                     , "C009"      # race
+                     , "C008"      # age
+                     , "VDD004"    # Educational attainment
+                     , "P040"      # Active commute
+                     , "P04101"    # Active commute time (hours)
+                     , "P04102"    # Active commute time (minutes)
+                     , "P04301"    # active travel to habitual activities
+                     , "P04302"    # active travel time to habitual activities
+                     , "P00101"    # Weight
+                     , "P00401"    # Height
+                     , "N001"      # health perception
+                     , "O009"      # car accident
+                     , "O011"      # travel mode when injured
+                     , "O014"      # accident hindered habitual activities
+                     , "O020"      # any sequel and / or disability due to this traffic accident
+                     , "Q002"      # Ever diagnosed with hypertension
+                     , "Q003"      # age at diagnosis for hypertension
+                     , "Q030"      # Ever diagnosed with diabetes
+                     , "Q031"      # age at diagnosis for diabetes
+                     , "Q060"      # Ever diagnosed with high cholesterol
+                     , "Q061"      # age at diagnosis for high cholesterol
+                     , "V0025"     # person selected for long questionaire
+                     , "M001"      # Type of interview
+                     , "UPA_PNS"   # UPA
+                     , "V0024"     # Strata
+                     , "V0029"     # person sample weight without calibratio
+                     , "V00291"    # person sample weight with calibration
+                     , "V00292"    # Population projection
+                     , "V00283"    # Dominio de pos-estrato 1
+                     , "V00293"    # Dominio de pos-estrato 2
+                     , "C004"      # Condição no domicílio
+                     , "V0006_PNS" # Número de ordem do domicílio na PNS
+                     , "E01602"   # Income
+                     , "E01604"    # Income
+                     , "E01802"    # Income
+                     , "E01804"    # Income
+                     , "F00102"    # Income
+                     , "F00702"    # Income
+                     , "F00802"    # Income
+                     , "VDF00102"    # Income
+                     )
+
+  
+  # read data
+    pns2013pes <- read_PNS('pessoas', 2013, 
+                           vars_subset = myvariblesPES, 
+                           root_path = ".")
+
+     
+
+  # make sure numeric variables are 'numeric' class
+    setDT(pns2013pes)
     
-    # Read the .txt file
-    pns2013pes <-   read_fwf(datafile,
-                       fwf_widths(dput(sas_file$width),
-                                  col_names=(dput(sas_file$varname))),
-                       progress = interactive())
+    changeCols <- colnames(pns2013pes)[5:42]
+    pns2013pes[,(changeCols):= lapply(.SD, as.numeric), .SDcols = changeCols]
     
-    # make sure all variables are 'numeric' class
-    pns2013pes <- as.data.table(data.matrix(pns2013pes))
     
+
 # clean memory
   rm(list=setdiff(ls(), c("pns2013pes", "pns2013dom")))
   gc(reset = T)
@@ -78,9 +118,8 @@ source("./R-scripts/0 LoadPackages.R")
 
 ########## 2. Recode Household data  ----------------
 
-  # year variable     
-    setDT(pns2013dom)[, year := 2013]
-  
+  # set data.table     
+    setDT(pns2013dom)
   
   # Urban vs Rural areas
     pns2013dom[V0026==1, urban := "Urban"]
@@ -102,20 +141,27 @@ source("./R-scripts/0 LoadPackages.R")
     table(pns2013dom$dummyVehicle)
     
 
-    
+
 # 3. Merge household and individual data sets---------
 
 # Merge datasets
-  pns2013 <- left_join(pns2013pes, pns2013dom)
+  pns2013 <- left_join(pns2013pes, pns2013dom, by=c('V0001', 'V0024', 'UPA_PNS', 'V0006_PNS',
+                                                    'V0029', 'V00291', 'V00292', 'V00283', 'V00293'))
 
 
 # clean memory
-  rm(list=setdiff(ls(), c("pns2013", "pns2013dom")))
+  #rm(list=setdiff(ls(), c("pns2013", "pns2013dom")))
   gc(reset = T)
 
 
+
+  
+  
 # 4: Add Variables to pns2013 data ---------------------------------
 
+  ## household ID ( unnecessary)
+  # pns2013[, householdID := paste(V0001, V0024, UPA_PNS, V0006_PNS, sep = ".") ]
+  
   # year variable     
   setDT(pns2013)[, year := 2013]
   
@@ -263,12 +309,12 @@ table(pns2013$edugroup)
 
   ### create indicator variable of ind. above 18yearsold that practice active travel for > 30minutes
   ## this is the definition used in table 3.4.1.1 of IBGE report
-    pns2013 <- transform(pns2013, actv_commutetime =       ifelse( is.na(P04101),0, P04101 * 60 + P04102)) # Active commute time
-    pns2013 <- transform(pns2013, actv_traveltimehabacts = ifelse( is.na(P04301),0, P04301 * 60 + P04302)) #active travel time to habitual activities, such as going to or taking someone to school 
-    pns2013 <- transform(pns2013, total_actvtraveltime = actv_commutetime + actv_traveltimehabacts) ## total active travel time
-    pns2013 <- transform(pns2013, physicallyactive30 = ifelse(total_actvtraveltime >= 30,1,0)) # total active travel time >30 (1,0)
-    pns2013 <- transform(pns2013, actv_commutetime30 = ifelse(actv_commutetime >= 30,1,0)) #commute time >30 (1,0)
-  
+    pns2013[, actv_commutetime := ifelse( is.na(P04101),0, P04101 * 60 + P04102)] # Active commute time
+    pns2013[, actv_traveltimehabacts := ifelse( is.na(P04301),0, P04301 * 60 + P04302)] #active travel time to habitual activities, such as going to or taking someone to school 
+    pns2013[, total_actvtraveltime := actv_commutetime + actv_traveltimehabacts] ## total active travel time
+    pns2013[, physicallyactive30 := ifelse(total_actvtraveltime >= 30,1,0)] # total active travel time >30 (1,0)
+    pns2013[, actv_commutetime30 := ifelse(actv_commutetime >= 30,1,0)] #commute time >30 (1,0)
+    
     table(pns2013$P040)
     table(pns2013$actv_commutetime30)
   
@@ -285,120 +331,89 @@ table(pns2013$edugroup)
     
 
     
-=====================================
 
 
-### Income Variables
+### 4.1 Income Variables ----
       
   # Summary of income variables
+      
     summary(pns2013$E01602)
     summary(pns2013$E01604)
     summary(pns2013$E01802)
     summary(pns2013$E01804)
+    summary(pns2013$F00102)
+    summary(pns2013$F00702)
+    summary(pns2013$F00802)
+    summary(pns2013$VDF00102)
     
-      # # function to sum row values ignoring NAs
-      #   # http://stackoverflow.com/questions/13106645/using-in-data-table-to-sum-the-values-of-two-columns-in-r-ignoring-nas
-      # `%+na%` <- function(x,y) {ifelse( is.na(x), y, ifelse( is.na(y), x, x+y) )}
-      # 
-      # pns2013[, totalincome2 := E01602 %+na% E01604 %+na% E01802 %+na% E01804 ]
-      # summary(pns2013$totalincome2)
 
-    # # identify all income sources
-    #   colsToSum <- c("E01602" , "E01604" , "E01802" , "E01804")
+    #  Household Income per Capita, compatible with PNAD 2008 data
+    pns2013[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001,
+                                    by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
+    summary(pns2013$v4721)
+    
+    
+    summary(pns2013$v4721)
+    # # >Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    # # >  0     340      670    1140    1190  146000  130415 
     # 
-    # # Create column with total income of each individual
-    #   pns2013[, totalincome := rowSums(pns2013[, colsToSum, with=FALSE], na.rm = T)] # sum all income sources
-    #   summary(pns2013$totalincome)
-
-
-    # Create column with total household income
-      pns2013[, totalhouseholdincome := sum(E01602, E01604 , E01802, E01804, na.rm = T) , # sum income from all sources
-              by=.(V0001, V0024, UPA_PNS, V0006_PNS, UPA, V00281, V00283, VDC001)]      # by household
-    
-    summary(pns2013$totalhouseholdincome)
-    head(table(pns2013$totalhouseholdincome))
-    
-    
-    # Create Household Income per Capita, compatible with PNAD 2008 data
-     pns2013[, v4721 := totalhouseholdincome / C001 ] # C001  VDC001
-     summary(pns2013$v4721)
-    
-    # identify how many indovoduals with  Household Income per Capita == 0 
-    head(table(pns2013$v4721)) # 58,608
+    # # 1119 casos com RDPC igual a 0
+    head(table(pns2013$v4721))
 
     
-    ## \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    ## TEMPORARY FIX
-    # DELETE individuals with household income equals to Zero (58,608 cases)
-    pns2013 <- pns2013[v4721 > 0,] 
+    
+        
+        
+        
 
-      
-
-      
-      
-########### Create income quantiles
-    
-      # Create  var. income deciles of Monthly household income per capitade
-      pns2013[, decileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
-                                                                   probs=seq(0, 1, by=0.1), na.rm=T),
-                                            include.lowest= TRUE, labels=1:10))]
-    
-    # Checking Table
-    table(pns2013$decileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
-    
-    
-    # Create  var. income quintile of Monthly household income per capitade
-    pns2013[, quintileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
-                                                                   probs=seq(0, 1, by=0.2), na.rm=T),
-                                            include.lowest= TRUE, labels=1:5))]
-    
-    table(pns2013$quintileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
-    
-    # function to Create Quintile for different regions
-    funQuintReg <- function(x){quintileRegion <- as.numeric(cut(x[, v4721], labels=c(1:5),
-                                                                breaks=quantile(x[, v4721], seq(0,1, 0.2), na.rm=T),
-                                                                include.lowest = TRUE))
-                              cbind(x, quintileRegion)
-                              }
-    
-    # function to Create Quartile for different regions
-    funQuartReg <- function(x){quartileRegion <- as.numeric(cut(x[, v4721], labels=c(1:4),
-                                                                breaks=quantile(x[, v4721], seq(0,1, 0.25), na.rm=T),
-                                                                include.lowest = TRUE))
-                              cbind(x, quartileRegion)
-                              }
-    
-    
-    
-    # function to Create Quintile for different Metro Areas
-    funQuintMetro <- function(x){quintileMetro <- as.numeric(cut(x[, v4721], labels=c(1:5),
-                                                                 breaks=quantile(x[, v4721], seq(0,1, 0.2), na.rm=T),
-                                                                 include.lowest = TRUE))
-    cbind(x, quintileMetro)
-    }
-    
-    # function to Create Quartile for different Metro Areas
-    funQuartMetro <- function(x){quartileMetro <- as.numeric(cut(x[, v4721], labels=c(1:4),
-                                                                 breaks=quantile(x[, v4721], seq(0,1, 0.25), na.rm=T),
-                                                                 include.lowest = TRUE))
-    cbind(x, quartileMetro)
-    }
-    
-    
-    # create regional income deciles, quintiles and quartiles
-    pns2013 <- do.call(rbind, lapply(split(pns2013, pns2013[, region]), funQuintReg)) ; gc(reset = T)
-    pns2013 <- do.call(rbind, lapply(split(pns2013, pns2013[, region]), funQuartReg)) ; gc(reset = T)
-    pns2013 <- do.call(rbind, lapply(split(pns2013, pns2013[, metro]), funQuintMetro)) ; gc(reset = T)
-    pns2013 <- do.call(rbind, lapply(split(pns2013, pns2013[, metro]), funQuartMetro)) ; gc(reset = T)
-    
-    head(pns2013)
-    
-    table(pns2013$quintileRegion) #Numero de casos dentro de cada Decil tem que ser igual/proximo
-    
-    # number of cases in each Metro area by income quartile
-    table(pns2013$quartileRegion, pns2013$metro) #Numero de casos dentro de cada Decil tem que ser igual/proximo
-    
-    
+# ########### Create income quantiles
+#     
+#       # Create  var. income deciles of Monthly household income per capitade
+#       pns2013[, decileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                                                    probs=seq(0, 1, by=0.1), na.rm=T),
+#                                             include.lowest= TRUE, labels=1:10))]
+#     
+#     # Checking Table
+#     table(pns2013$decileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
+#     
+#     
+#     # Create  var. income quintile of Monthly household income per capitade
+#     pns2013[, quintileBR:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                                                    probs=seq(0, 1, by=0.2), na.rm=T),
+#                                             include.lowest= TRUE, labels=1:5))]
+#     
+#     table(pns2013$quintileBR) #Numero de casos dentro de cada Decil tem que ser igual/proximo
+#     
+#     # function to Create Quintile for different regions
+#     pns2013[, quintileRegion:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                                probs=seq(0, 1, by=0.2), na.rm=T),
+#                                                include.lowest= TRUE, labels=1:5)), by=region]
+#     
+# 
+#     # function to Create Quartile for different regions
+#     pns2013[, quartileRegion:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                               probs=seq(0, 1, by=0.25), na.rm=T),
+#                                               include.lowest= TRUE, labels=1:4)), by=region]
+#     
+#     
+#     # function to Create Quintile for different Metro Areas
+#     pns2013[, quintileMetro:= as.numeric( cut(v4721, 
+#                                               breaks=quantile(v4721, probs=seq(0, 1, by=0.2), na.rm=T),
+#                                               include.lowest= TRUE, labels=1:5)), by=metro]
+#     
+#     # function to Create Quartile for different Metro Areas
+#     pns2013[, quartileMetro:= as.numeric( cut(v4721, breaks=quantile(v4721,
+#                                               probs=seq(0, 1, by=0.25), na.rm=T),
+#                                               include.lowest= TRUE, labels=1:4)), by=metro]
+#     
+# 
+# 
+#     # number of cases in each Region/Metro area by income quantile
+#     #Numero de casos dentro de cada Decil tem que ser igual/proximo
+#     table(pns2013$quintileRegion, pns2013$region)
+#     table(pns2013$quintileMetro, pns2013$metro) 
+#     gc(reset = T)
+#     
     
     
     
@@ -417,6 +432,8 @@ table(pns2013$edugroup)
 
     saveRDS(pns2013, file="./data/pns2013.Rds")
     saveRDS(pns2013dom, file="./data/pns2013dom.Rds")
+    saveRDS(pns2013pes, file="./data/pns2013pes.Rds")
+    
     
     
     
