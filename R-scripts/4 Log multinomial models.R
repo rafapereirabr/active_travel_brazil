@@ -162,6 +162,22 @@ exp(interval_q5_out2)
 ####Adjusted models using household income per capita to stratify####
 
 ##1st quintile of income----
+# "Yes, all the journey" (reference) vs. "Yes, part of the journey"
+#First, solve error "No valid set of coefficients has been found: please supply starting values".
+#Get and save intercept's starting value.
+coefini <- coefficients(svyglm(formula = P040_1 ~ NULL,
+                               design = subset(pns13.18y.design, quintileBR == 1),
+                               family = quasibinomial(link = "log")))
+
+adj_q1_out1 <- svyglm(formula = P040_1 ~ dummyVehicle_1 + v0302 + AGE,
+                 design = subset(pns13.18y.design, quintileBR == 1),
+                 family = quasibinomial(link = "log"),
+                 start = c(coefini, rep(0, 7)))
+interval_q1_out1_adj <- confint(adj_q1_out1)
+summary(adj_q1_out1)
+exp(adj_q1_out1$coefficients)
+exp(interval_q1_out1_adj)
+
 #"Yes, all the journey" (reference) vs. "No"
 #First, solve error "No valid set of coefficients has been found: please supply starting values".
 #Get and save intercept's starting value.
@@ -169,16 +185,33 @@ coefini <- coefficients(svyglm(formula = P040_2 ~ NULL,
                                design = subset(pns13.18y.design, quintileBR == 1),
                                family = quasibinomial(link = "log")))
 
-adj_q1 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
+adj_q1_out2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
                  design = subset(pns13.18y.design, quintileBR == 1),
                  family = quasibinomial(link = "log"),
                  start = c(coefini, rep(0, 7)))
-interval_q1_adj <- confint(adj_q1)
-summary(adj_q1)
-exp(adj_q1$coefficients)
-exp(interval_q1_adj)
+interval_q1_out2_adj <- confint(adj_q1_out2)
+summary(adj_q1_out2)
+exp(adj_q1_out2$coefficients)
+exp(interval_q1_out2_adj)
 
 ##2nd quintile of income----
+# "Yes, all the journey" (reference) vs. "Yes, part of the journey"
+#First, solve error "No valid set of coefficients has been found: please supply starting values".
+#Get and save intercept's starting value.
+coefini <- coefficients(svyglm(formula = P040_1 ~ NULL,
+                               design = subset(pns13.18y.design, quintileBR == 2),
+                               family = quasibinomial(link = "log")))
+
+adj_q2_out1 <- svyglm(formula = P040_1 ~ dummyVehicle_1 + v0302 + AGE,
+                      design = subset(pns13.18y.design, quintileBR == 2),
+                      family = quasibinomial(link = "log"),
+                      start = c(coefini, rep(0, 7)))
+interval_q2_out1_adj <- confint(adj_q2_out1)
+summary(adj_q2_out1)
+exp(adj_q2_out1$coefficients)
+exp(interval_q2_out1_adj)
+
+
 #"Yes, all the journey" (reference) vs. "No"
 #First, solve error "No valid set of coefficients has been found: please supply starting values".
 #Get and save intercept's starting value.
@@ -186,16 +219,32 @@ coefini <- coefficients(svyglm(formula = P040_2 ~ NULL,
                                design = subset(pns13.18y.design, quintileBR == 2),
                                family = quasibinomial(link = "log")))
 
-adj_q2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
+adj_q2_out2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
                  design = subset(pns13.18y.design, quintileBR == 2),
                  family = quasibinomial(link = "log"),
                  start = c(coefini, rep(0, 7)))
-interval_q2_adj <- confint(adj_q2)
-summary(adj_q2)
-exp(adj_q2$coefficients)
-exp(interval_q2_adj)
+interval_q2_out2_adj <- confint(adj_q2_out2)
+summary(adj_q2_out2)
+exp(adj_q2_out2$coefficients)
+exp(interval_q2_out2_adj)
 
 ##3rd quintile of income----
+# "Yes, all the journey" (reference) vs. "Yes, part of the journey"
+#First, solve error "No valid set of coefficients has been found: please supply starting values".
+#Get and save intercept's starting value.
+coefini <- coefficients(svyglm(formula = P040_1 ~ NULL,
+                               design = subset(pns13.18y.design, quintileBR == 3),
+                               family = quasibinomial(link = "log")))
+
+adj_q3_out1 <- svyglm(formula = P040_1 ~ dummyVehicle_1 + v0302 + AGE,
+                      design = subset(pns13.18y.design, quintileBR == 3),
+                      family = quasibinomial(link = "log"),
+                      start = c(coefini, rep(0, 7)))
+interval_q3_out1_adj <- confint(adj_q3_out1)
+summary(adj_q3_out1)
+exp(adj_q3_out1$coefficients)
+exp(interval_q3_out1_adj)
+
 #"Yes, all the journey" (reference) vs. "No"
 #First, solve error "No valid set of coefficients has been found: please supply starting values".
 #Get and save intercept's starting value.
@@ -203,16 +252,32 @@ coefini <- coefficients(svyglm(formula = P040_2 ~ NULL,
                                design = subset(pns13.18y.design, quintileBR == 3),
                                family = quasibinomial(link = "log")))
 
-adj_q3 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
+adj_q3_out2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
                  design = subset(pns13.18y.design, quintileBR == 3),
                  family = quasibinomial(link = "log"),
                  start = c(coefini, rep(0, 7)))
-interval_q3_adj <- confint(adj_q3)
-summary(adj_q3)
-exp(adj_q3$coefficients)
-exp(interval_q3_adj)
+interval_q3_out2_adj <- confint(adj_q3_out2)
+summary(adj_q3_out2)
+exp(adj_q3_out2$coefficients)
+exp(interval_q3_out2_adj)
 
 ##4th quintile of income----
+# "Yes, all the journey" (reference) vs. "Yes, part of the journey"
+#First, solve error "No valid set of coefficients has been found: please supply starting values".
+#Get and save intercept's starting value.
+coefini <- coefficients(svyglm(formula = P040_1 ~ NULL,
+                               design = subset(pns13.18y.design, quintileBR == 4),
+                               family = quasibinomial(link = "log")))
+
+adj_q4_out1 <- svyglm(formula = P040_1 ~ dummyVehicle_1 + v0302 + AGE,
+                      design = subset(pns13.18y.design, quintileBR == 4),
+                      family = quasibinomial(link = "log"),
+                      start = c(coefini, rep(0, 7)))
+interval_q4_out1_adj <- confint(adj_q4_out1)
+summary(adj_q4_out1)
+exp(adj_q4_out1$coefficients)
+exp(interval_q4_out1_adj)
+
 #"Yes, all the journey" (reference) vs. "No"
 #First, solve error "No valid set of coefficients has been found: please supply starting values".
 #Get and save intercept's starting value.
@@ -220,16 +285,32 @@ coefini <- coefficients(svyglm(formula = P040_2 ~ NULL,
                                design = subset(pns13.18y.design, quintileBR == 4),
                                family = quasibinomial(link = "log")))
 
-adj_q4 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
+adj_q4_out2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
                  design = subset(pns13.18y.design, quintileBR == 4),
                  family = quasibinomial(link = "log"),
                  start = c(coefini, rep(0, 7)))
-interval_q4_adj <- confint(adj_q4)
-summary(adj_q4)
-exp(adj_q4$coefficients)
-exp(interval_q4_adj)
+interval_q4_out2_adj <- confint(adj_q4_out2)
+summary(adj_q4_out2)
+exp(adj_q4_out2$coefficients)
+exp(interval_q4_out2_adj)
 
 ##5th quintile of income----
+# "Yes, all the journey" (reference) vs. "Yes, part of the journey"
+#First, solve error "No valid set of coefficients has been found: please supply starting values".
+#Get and save intercept's starting value.
+coefini <- coefficients(svyglm(formula = P040_1 ~ NULL,
+                               design = subset(pns13.18y.design, quintileBR == 5),
+                               family = quasibinomial(link = "log")))
+
+adj_q5_out1 <- svyglm(formula = P040_1 ~ dummyVehicle_1 + v0302 + AGE,
+                      design = subset(pns13.18y.design, quintileBR == 5),
+                      family = quasibinomial(link = "log"),
+                      start = c(coefini, rep(0, 7)))
+interval_q5_out1_adj <- confint(adj_q5_out1)
+summary(adj_q5_out1)
+exp(adj_q5_out1$coefficients)
+exp(interval_q5_out1_adj)
+
 #"Yes, all the journey" (reference) vs. "No"
 #First, solve error "No valid set of coefficients has been found: please supply starting values".
 #Get and save intercept's starting value.
@@ -237,11 +318,11 @@ coefini <- coefficients(svyglm(formula = P040_2 ~ NULL,
                                design = subset(pns13.18y.design, quintileBR == 5),
                                family = quasibinomial(link = "log")))
 
-adj_q5 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
+adj_q5_out2 <- svyglm(formula = P040_2 ~ dummyVehicle_1 + v0302 + AGE,
                  design = subset(pns13.18y.design, quintileBR == 5),
                  family = quasibinomial(link = "log"),
                  start = c(coefini, rep(0, 7)))
-interval_q5_adj <- confint(adj_q5)
-summary(adj_q5)
-exp(adj_q5$coefficients)
-exp(interval_q5_adj)
+interval_q5_out2_adj <- confint(adj_q5_out2)
+summary(adj_q5_out2)
+exp(adj_q5_out2$coefficients)
+exp(interval_q5_out2_adj)
