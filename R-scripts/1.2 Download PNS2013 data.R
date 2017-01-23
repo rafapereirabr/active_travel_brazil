@@ -98,7 +98,7 @@ source("./R-scripts/0 LoadPackages.R")
   # read data
     pns2013pes <- read_PNS('pessoas', 2013, 
                            vars_subset = myvariblesPES, 
-                           root_path = ".")
+                           root_path = "./data")
 
      
 
