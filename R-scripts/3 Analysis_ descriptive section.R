@@ -1,3 +1,4 @@
+
 # Analyze Active Travel in Brazil using data from PNS 2013 and PNAD2008 (suplemento de Saude)
 # Script written by Rafael Pereira - urbandemographics.blogspot.com
 # Aug 2016, Oxford UK.
@@ -162,7 +163,7 @@ plot1a <-
   # scale_fill_viridis(discrete=T) +  scale_color_viridis(discrete=T)
   # scale_fill_manual(values = wes_palette("Royal1"), guide = guide_legend(title = NULL)) +
   # scale_color_manual(values = wes_palette("Royal1"), guide = guide_legend(title = NULL)) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
   theme(axis.title.x  = element_blank()) +
   theme(legend.position = "top") 
 
@@ -174,8 +175,9 @@ plot1b <-
   baseplot + 
   scale_colour_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
   scale_fill_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
   theme(axis.title.x  = element_blank()) +
+  theme(axis.title.y  = element_blank()) +
   theme(legend.position = "top") 
 
 
@@ -187,7 +189,7 @@ plot1c <-
   baseplot + 
   scale_colour_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
   scale_fill_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
   theme(axis.title.x  = element_blank()) +
   theme(legend.position = "top") +
   theme(legend.position="none")
@@ -201,20 +203,34 @@ plot1d <-
   baseplot + 
   scale_colour_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
   scale_fill_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
   theme(axis.title.x  = element_blank()) +
+  theme(axis.title.y  = element_blank()) +
   theme(legend.position = "top")  +
   theme(legend.position="none")
 
 
 
 # Arrange sub-plots  adding two empty plots to increasing the space between plots
-  fig1 <- plot_grid(plot1a, plot1b, NULL,NULL, plot1c, plot1d,
-                    labels=c('A', 'B','','','C',"D"), 
-                    nrow = 3, rel_heights = c(1, 0.1, 1))
+  fig1 <-   plot_grid( plot1a + theme(legend.position="none"),
+                       plot1b + theme(legend.position="none"),
+                       NULL, NULL,
+                       plot1c + theme(legend.position="none"),
+                       plot1d + theme(legend.position="none"),
+                       align = 'vh',
+                       labels=c('A', 'B','','','C',"D"), 
+                       hjust = -1,
+                       nrow = 3, rel_heights = c(1, 0.1, 1))
+  
+  
+  # create separate legend
+  legend_1a <- get_legend(plot1a + theme(legend.position="top", legend.key.width=unit(3,"line")))
 
-
-
+  
+  # add the legend on top of plot the row we made earlier. Give it 11% of the height of the plot
+  fig1 <- plot_grid( legend_1a, fig1, ncol = 1, rel_heights = c(.11, 1))
+  
+  
 # save plot
   ggsave(fig1, file="./plots/fig1.png", dpi = 800,
          width = 35, height = 20, units = "cm")
@@ -362,7 +378,7 @@ plot2a <-
   # scale_color_manual(values = wes_palette("Royal1"), guide = guide_legend(title = NULL)) +
   scale_y_continuous(labels = scales::percent, limits=c(0,1)) +
   theme(axis.title.x  = element_blank()) +
-  theme(legend.position = "top") +
+  theme(legend.position = "none") +
   theme(plot.margin = unit(c(1,1,2,1), "cm")) 
 
 
@@ -376,7 +392,8 @@ plot2b <-
   scale_fill_grey( start = 0, end = 0.8, guide = guide_legend(title = NULL)) +
   scale_y_continuous(labels = scales::percent, limits=c(0,1)) +
   theme(axis.title.x  = element_blank()) +
-  theme(legend.position = "top") +
+  theme(axis.title.y  = element_blank()) +
+  theme(legend.position = "none") +
   theme(plot.margin = unit(c(1,1,2,1), "cm")) 
 
 
@@ -396,18 +413,18 @@ plot2c <-
 
 
 plot2a <- ggdraw(plot2a) + 
-  draw_plot_label("A", size = 14) + 
+  draw_plot_label("A", size = 14, hjust = -4) +  
   draw_label("Country",  x = 0.5, y = .075,
              size = 14, fontface = 'bold')
 
 
 plot2b <- ggdraw(plot2b) + 
-  draw_plot_label("B", size = 14) + 
+  draw_plot_label("B", size = 14, hjust = -4) + 
   draw_label("Region",  x = 0.5, y = .075,
              size = 14, fontface = 'bold')
 
 plot2c <- ggdraw(plot2c) + 
-  draw_plot_label("C", size = 14) + 
+  draw_plot_label("C", size = 14, hjust = -4) + 
   draw_label("Metropolitan Area",  x = 0.5, y = .075,
              size = 14, fontface = 'bold')
 
@@ -415,8 +432,18 @@ plot2c <- ggdraw(plot2c) +
 
   
 # Arrange sub-plots
-  fig2 <- plot_grid(arrangeGrob(plot2a, plot2b, ncol = 2), plot2c, ncol = 1)
+  fig2 <-   plot_grid( arrangeGrob(plot2a ,
+                                   plot2b , ncol = 2),
+                                   plot2c , ncol = 1)
 
+  
+
+  # add the legend on top of plot the row we made earlier. Give it 11% of the height of the plot
+  fig2 <- plot_grid( legend_1a, fig2, ncol = 1, rel_heights = c(.05, 1))
+  
+  
+  
+  
 # save plot
   ggsave(fig2, file="./plots/fig2.png", dpi = 800,
          width = 42, height = 22, units = "cm")
