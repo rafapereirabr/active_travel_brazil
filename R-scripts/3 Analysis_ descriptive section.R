@@ -22,7 +22,7 @@ source("./R-scripts/0 LoadPackages.R")
 ############ Load DATA Sets ############
 
 # pns2013 <- readRDS("./data/pns2013.Rds")
-# pnad2008 <- readRDS("pnad2008.Rds")
+# pnad2008 <- readRDS("./data/pnad2008.Rds")
 # 
 # pns2013dom <- readRDS("./data/pns2013dom.Rds")
 # pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
@@ -81,6 +81,15 @@ tab1_age <- svyby(~factor( dummyVehicle=="Yes") ,
                   design = pns13.18y.design ,
                   vartype="ci", level = 0.95) %>% setDT()
 
+
+tab1_age <- svyby(~factor( dummyVehicle=="Yes") , # using svymean because svyciprop was generating value 0 for poor individuals at 65+ for unknown reason. svymean returns virtually same results
+                   ~quintileBR+AGE, svymean,
+                   design = pns13.18y.design ,
+                   vartype="ci", level = 0.95 , na.rm=TRUE) %>% setDT()
+
+  # small table editing
+  tab1_age<- tab1_age[, c(1,2,4,6,8)]
+  names(tab1_age) <- c("quintileBR", "AGE", "factor(dummyVehicle == \"Yes\")", "ci_l", "ci_u")
 
 
 tab1_actvcommute <- svyby(~factor( dummyVehicle=="Yes" ) ,
@@ -253,7 +262,7 @@ tab2_pns_total <- svyby(~ dummyVehicle=="Yes" ,
                          vartype="ci", level = 0.95, na.rm=T) %>% setDT()
 
 tab2_pns_urban <- svyby(~ dummyVehicle=="Yes" ,
-                         ~quintileBR+urban+year, svymean ,
+                         ~quintileUrban+urban+year, svymean ,
                          design = pns13.18y.design ,
                          vartype="ci", level = 0.95, na.rm=T) %>% setDT()
 
@@ -276,7 +285,7 @@ tab2_pnad_total <- svyby(~ dummyVehicle=="Yes" ,
                         vartype="ci", level = 0.95, na.rm=T) %>% setDT()
 
 tab2_pnad_urban <- svyby(~ dummyVehicle=="Yes" ,
-                         ~quintileBR+urban+year, svymean ,
+                         ~quintileUrban+urban+year, svymean ,
                          design = pnad08.18y.design ,
                          vartype="ci", level = 0.95, na.rm=T) %>% setDT()
 

@@ -42,6 +42,7 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
                 C009,    # race
                 C008,    # age
                 VDD004,  # Educational attainment
+                urban,   # urban x rural areas
                 P040,    # Active commute
                 P04101,  # Active commute time (hours)
                 P04102,  # Active commute time (minutes)
@@ -152,9 +153,9 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
       
           
   # Quntile metro: Calculate Quntile intervals considering Sample Design
-    quintiles_metro <- svyby(~v4721, ~metro, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+    quintiles_metro <- svyby(~v4721, ~metro, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
     quintiles_metro <- data.table(quintiles_metro)
-  
+
     # Categorize individuals according to their quintile position
       for (i in c(quintiles_metro$metro) ) { 
         quintile <- as.vector( quintiles_metro[metro== i , c(2:7)] )
@@ -166,7 +167,7 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
     
     
   # Quintile Region: Calculate Quntile intervals considering Sample Design
-    quintiles_region <- svyby(~v4721, ~region, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+    quintiles_region <- svyby(~v4721, ~region, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
     quintiles_region <- data.table(quintiles_region)
     
     # Categorize individuals according to their quintile position
@@ -178,7 +179,18 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
     table(pns2013$quintileRegion, pns2013$region)
     
   
-  
+  # Quntile URBANxRURAL: Calculate Quntile intervals considering Sample Design
+    quintiles_urban <- svyby(~v4721, ~urban, design = sample.pns13.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
+    quintiles_urban <- data.table(quintiles_urban)
+    
+    # Categorize individuals according to their quintile position
+    for (i in c(quintiles_urban$urban) ) { 
+      quintile <- as.vector( quintiles_urban[urban== i , c(2:7)] )
+      pns2013[ urban== i, quintileUrban :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+    }
+    
+    table(pns2013$quintileUrban, pns2013$urban)
+    
     
   
     
@@ -247,7 +259,7 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
    
    
    # Quntile metro: Calculate Quntile intervals considering Sample Design
-   quintiles_metro <- svyby(~v4721, ~metro, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+   quintiles_metro <- svyby(~v4721, ~metro, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
    quintiles_metro <- data.table(quintiles_metro)
    
    # Categorize individuals according to their quintile position
@@ -260,7 +272,7 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
    
    
    # Quintile Region: Calculate Quntile intervals considering Sample Design
-   quintiles_region <- svyby(~v4721, ~region, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, ci=T)
+   quintiles_region <- svyby(~v4721, ~region, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
    quintiles_region <- data.table(quintiles_region)
    
    # Categorize individuals according to their quintile position
@@ -271,6 +283,18 @@ pnad2008dom <- readRDS("./data/pnad2008dom.Rds")
    
    table(pnad2008$quintileRegion, pnad2008$region)
    
+   
+   # Quntile URBANxRURAL: Calculate Quntile intervals considering Sample Design
+   quintiles_urban <- svyby(~v4721, ~urban, design = sample.pos, svyquantile, quantiles = seq(0, 1 , by=0.2), method = "linear", ties="rounded", na.rm=T, keep.var=FALSE)
+   quintiles_urban <- data.table(quintiles_urban)
+   
+   # Categorize individuals according to their quintile position
+   for (i in c(quintiles_urban$urban) ) { 
+     quintile <- as.vector( quintiles_urban[urban== i , c(2:7)] )
+     pnad2008[ urban== i, quintileUrban :=  as.numeric(cut( v4721 , quintile, include.lowest= TRUE, labels=1:5, na.rm=T )) ]
+   }
+   
+   table(pnad2008$quintileUrban, pnad2008$urban)
    
    
    
